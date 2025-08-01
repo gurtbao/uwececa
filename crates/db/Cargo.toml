@@ -6,6 +6,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
+chrono.workspace = true
 color-eyre.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
