@@ -1,5 +1,11 @@
 use std::sync::LazyLock;
 
+const GIT_COMMIT_HASH: &'static str = env!("GIT_HASH");
+
+pub const fn git_hash() -> &'static str {
+    GIT_COMMIT_HASH
+}
+
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum Environment {
@@ -44,3 +50,12 @@ pub fn get_environment() -> Environment {
     *ENVIRONMENT
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_git_hash() {
+        assert_ne!(git_hash().len(), 0);
+    }
+}

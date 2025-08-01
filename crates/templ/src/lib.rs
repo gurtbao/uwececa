@@ -3,7 +3,7 @@ use std::io::Write;
 use minijinja::{Environment, path_loader};
 use minijinja_autoreload::{AutoReloader, EnvironmentGuard};
 use serde::Serialize;
-use uwececa_cfg::is_development;
+use uwececa_cfg::{git_hash, is_development};
 
 pub struct Renderer(AutoReloader);
 
@@ -40,6 +40,8 @@ pub fn get_templates<'a>(path: String) -> color_eyre::Result<Renderer> {
 
         minijinja_contrib::add_to_environment(&mut env);
 
+        env.add_global("git_commit_hash", git_hash());
+
         env.set_loader(path_loader(&path));
         if is_development() {
             notifier.watch_path(&path, true);
@@ -50,4 +52,3 @@ pub fn get_templates<'a>(path: String) -> color_eyre::Result<Renderer> {
 
     Ok(Renderer(reloader))
 }
-
