@@ -19,4 +19,4 @@ uuid = { version = "1.17.0", features = ["serde", "v4"] }
 
 uwececa_cfg = {path = "crates/cfg"}
 uwececa_db = {path = "crates/db"}
-uwececa_utils = {path = "crates/utils"}
+uwececa_macros = {path = "crates/macros"}

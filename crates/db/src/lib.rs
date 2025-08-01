@@ -5,7 +5,7 @@ use sqlx::{
     error::{DatabaseError, ErrorKind},
     postgres::PgPoolOptions,
 };
-use uwececa_utils::transitive_from;
+use uwececa_macros::transitive_from;
 
 pub mod testing;
 

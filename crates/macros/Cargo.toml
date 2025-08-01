@@ -1,5 +1,5 @@
 [package]
-name = "uwececa_utils"
+name = "uwececa_macros"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
