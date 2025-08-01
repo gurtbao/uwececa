@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Lorenzo Good <foehammer@disroot.org>"]
+license = "Apache-2.0"
+
+[workspace.dependencies]
+color-eyre = "0.6.5"
+serde = { version = "1.0.219", features = ["derive"] }
+sqlx = { version = "0.8.6", features = ["chrono", "json", "postgres", "runtime-tokio", "tls-native-tls", "uuid"] }
+tokio = { version = "1.47.0", features = ["full"] }
+uuid = { version = "1.17.0", features = ["serde", "v7"] }
+
+
+uwececa_db = {path = "crates/db"}
+uwececa_utils = {path = "crates/utils"}
