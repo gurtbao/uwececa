@@ -16,5 +16,6 @@ tokio = { version = "1.47.0", features = ["full"] }
 uuid = { version = "1.17.0", features = ["serde", "v7"] }
 
 
+uwececa_cfg = {path = "crates/cfg"}
 uwececa_db = {path = "crates/db"}
 uwececa_utils = {path = "crates/utils"}

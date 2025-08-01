@@ -1,0 +1,14 @@
+[package]
+name = "uwececa_templ"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+color-eyre.workspace = true
+minijinja = { version = "2.11.0", features = ["loader"] }
+minijinja-autoreload = "2.11.0"
+minijinja-contrib = { version = "2.11.0", features = ["datetime"] }
+serde.workspace = true
+uwececa_cfg.workspace = true
