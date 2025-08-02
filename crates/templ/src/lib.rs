@@ -6,6 +6,7 @@ use serde::Serialize;
 use uwececa_cfg::{git_hash, is_development};
 
 pub struct Renderer(AutoReloader);
+pub use minijinja::context;
 
 impl Renderer {
     pub fn acquire_env(&self) -> color_eyre::Result<EnvironmentGuard<'_>> {
@@ -25,7 +26,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn render_string<S: Serialize, W: Write>(
+    pub fn render_string<S: Serialize>(
         &self,
         name: &'static str,
         s: S,
@@ -51,4 +52,22 @@ pub fn get_templates<'a>(path: String) -> color_eyre::Result<Renderer> {
     });
 
     Ok(Renderer(reloader))
+}
+
+#[cfg(test)]
+mod test {
+    use minijinja::context;
+
+    use crate::get_templates;
+
+    #[test]
+    fn test_templates() {
+        let templ = get_templates("./test".into()).unwrap();
+
+        let rendered = templ
+            .render_string("test.html", context!(data => "Hallo"))
+            .unwrap();
+
+        assert_eq!(rendered, "<h1>Hallo</h1>");
+    }
 }
