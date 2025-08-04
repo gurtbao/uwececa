@@ -10,4 +10,3 @@ chrono.workspace = true
 color-eyre.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
-uwececa_macros.workspace = true

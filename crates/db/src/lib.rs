@@ -5,8 +5,8 @@ use sqlx::{
     error::{DatabaseError, ErrorKind},
     postgres::PgPoolOptions,
 };
-use uwececa_macros::transitive_from;
 
+#[cfg(test)]
 pub mod testing;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -54,7 +54,11 @@ impl From<color_eyre::Report> for Error {
     }
 }
 
-transitive_from!(sqlx::migrate::MigrateError, Error, color_eyre::Report);
+impl From<sqlx::migrate::MigrateError> for Error {
+    fn from(value: sqlx::migrate::MigrateError) -> Self {
+        Self::Unknown(value.into())
+    }
+}
 
 pub async fn connect(url: &str) -> Result<Db> {
     let pool = PgPoolOptions::new().connect(url).await?;

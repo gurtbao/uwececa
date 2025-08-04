@@ -18,7 +18,7 @@ async fn get_conn() -> Db {
 }
 
 // Get a test transaction on the already existing global pool.
-pub async fn get_test_tx() -> Tx<'static> {
+pub async fn get_test_tx<'a>() -> Tx<'a> {
     get_conn()
         .await
         .begin()

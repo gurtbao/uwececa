@@ -2225,12 +2225,7 @@ dependencies = [
  "color-eyre",
  "sqlx",
  "tokio",
- "uwececa_macros",
 ]
-
-[[package]]
-name = "uwececa_macros"
-version = "0.1.0"
 
 [[package]]
 name = "uwececa_mainsite"
