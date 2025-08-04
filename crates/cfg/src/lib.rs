@@ -1,4 +1,15 @@
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
+
+use serde::Deserialize;
+
+pub type Config = Arc<Cfg>;
+
+#[derive(Debug, Deserialize)]
+pub struct Cfg {
+    pub web_port: u16,
+    pub assets_location: String,
+    pub template_path: String,
+}
 
 const GIT_COMMIT_HASH: &'static str = env!("GIT_HASH");
 

@@ -1,0 +1,15 @@
+[package]
+name = "uwececa_mainsite"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+axum = "0.8.4"
+color-eyre.workspace = true
+mime = "0.3.17"
+serde.workspace = true
+tracing = "0.1.41"
+uwececa_cfg.workspace = true
+uwececa_templ.workspace = true
