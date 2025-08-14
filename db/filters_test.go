@@ -38,3 +38,24 @@ func TestFilterConditionCorrectForEQ(t *testing.T) {
 
 	require.Equal(t, "id = ?", filter.Condition())
 }
+
+func TestBuildWhere(t *testing.T) {
+	t.Parallel()
+
+	where, args := db.BuildWhere([]db.Filter{
+		db.FilterEq("id", 1),
+		db.FilterIn("id", []int{2, 3, 4}),
+	})
+
+	require.Equal(t, " where id = ? and id in (?, ?, ?)", where)
+	require.Equal(t, []any{1, 2, 3, 4}, args)
+}
+
+func TestBuildWhereReturnsEmptyWhenFiltersEmpty(t *testing.T) {
+	t.Parallel()
+
+	where, args := db.BuildWhere([]db.Filter{})
+
+	require.Equal(t, "", where)
+	require.Empty(t, args)
+}

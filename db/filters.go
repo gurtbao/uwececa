@@ -6,6 +6,22 @@ import (
 	"strings"
 )
 
+func BuildWhere(filters []Filter) (string, []any) {
+	var conditions []string
+	var args []any
+	for _, v := range filters {
+		conditions = append(conditions, v.Condition())
+		args = append(args, v.Arg()...)
+	}
+	whereClause := ""
+
+	if len(conditions) != 0 {
+		whereClause = " where " + strings.Join(conditions, " and ")
+	}
+
+	return whereClause, args
+}
+
 type Filter struct {
 	key string
 	arg any
