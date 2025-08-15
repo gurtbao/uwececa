@@ -41,6 +41,10 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("config load error: %w", err)
 	}
 
+	if cfg.Core.Development {
+		slog.Info("started in development mode")
+	}
+
 	db, err := db.New(cfg.DB.Location)
 	if err != nil {
 		return fmt.Errorf("error opening db: %w", err)

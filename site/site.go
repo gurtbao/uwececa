@@ -28,7 +28,12 @@ type Site struct {
 }
 
 func New(c *config.Config, db *db.DB) *Site {
-	tmpl := templates.NewTemplates(embedFS)
+	var tmpl *templates.Templates
+	if c.Core.Development {
+		tmpl = templates.NewDevTemplates(embedFS, "./site/templates")
+	} else {
+		tmpl = templates.NewTemplates(embedFS)
+	}
 
 	return &Site{
 		config:    c,
@@ -79,6 +84,10 @@ func (s *Site) RenderTemplate(w http.ResponseWriter, statusCode int, name, base 
 }
 
 func (s *Site) Static() http.Handler {
+	if s.config.Core.Development {
+		return http.StripPrefix("/static", http.FileServer(http.Dir("./site/static")))
+	}
+
 	sub, err := fs.Sub(s.embedFS, "static")
 	if err != nil {
 		slog.Error("no static dir in mainsite", "error", err)
