@@ -22,7 +22,6 @@
           pkgs.nixos-shell
           pkgs.coreutils
           pkgs.gcc
-          pkgs.glibc
         ];
 
         env.CGO_ENABLED = 1;
