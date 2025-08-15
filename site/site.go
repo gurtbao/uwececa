@@ -49,6 +49,7 @@ func (s *Site) Routes() http.Handler {
 	r.Use(chimd.Compress(5))
 
 	r.Handle("/static/*", s.Static())
+	r.Get("/", s.Index)
 
 	return r
 }
@@ -110,4 +111,8 @@ func HxRedirect(w http.ResponseWriter, target string) {
 func HxLocation(w http.ResponseWriter, target string) {
 	w.Header().Set("HX-Location", target)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
+	s.RenderPlain(w, http.StatusOK, "home", nil)
 }
