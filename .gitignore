@@ -36,3 +36,6 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# sqlite:
+db.sqlite3*
