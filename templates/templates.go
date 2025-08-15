@@ -108,10 +108,6 @@ func (p *Templates) loadAllTemplates() {
 	p.t = templates
 }
 
-func (p *Templates) ExecuteBase(name string, w io.Writer, params any) error {
-	return p.executeReload(name, w, "layouts/base", params)
-}
-
 func (p *Templates) ExecutePlain(name string, w io.Writer, params any) error {
 	return p.executeReload(name, w, "", params)
 }
