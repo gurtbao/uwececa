@@ -51,6 +51,8 @@ func (s *Site) Routes() http.Handler {
 	r.Handle("/static/*", s.Static())
 	r.Get("/", s.Index)
 
+	r.NotFound(s.NotFound)
+
 	return r
 }
 
@@ -115,4 +117,8 @@ func HxLocation(w http.ResponseWriter, target string) {
 
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
 	s.RenderTemplate(w, http.StatusOK, "home", "layouts/base", nil)
+}
+
+func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) {
+	s.RenderTemplate(w, http.StatusNotFound, "404", "layouts/base", nil)
 }
