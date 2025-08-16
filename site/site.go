@@ -120,5 +120,17 @@ func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(w, http.StatusNotFound, "404", "layouts/base", nil)
+	s.FullpageError(w, fullPageErrorParams{
+		Code:    http.StatusNotFound,
+		Message: "Resource Not Found.",
+	})
+}
+
+type fullPageErrorParams struct {
+	Code    int
+	Message string
+}
+
+func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) {
+	s.RenderTemplate(w, params.Code, "error", "layouts/base", params)
 }
