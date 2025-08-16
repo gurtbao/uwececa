@@ -10,24 +10,35 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+	<title>{{- block "title" . }}No Title !!{{ end }} - UWECECA</title>
+
 	<link rel="stylesheet" href="/static/bootstrap.min.css">
 	<script src="/static/bootstrap.min.js"></script>
 </head>
 
-<body class="bg-light">
+<body class="d-flex flex-column min-vh-100 bg-light">
 	<nav class="navbar navbar-expand-lg">
 		<div class="container-md">
 			<a class="navbar-brand fw-bold">UWaterloo ECE</a>
 
 			<div>
-				<a class="btn btn-warning" href="/signup">Signup</a>
 				<a class="btn btn-outline-dark" href="/login">Login</a>
 			</div>
 		</div>
 	</nav>
-	<main class="container-md">
+	<main class="container-md flex-grow-1 d-flex flex-column">
 		{{ block "content" . }}{{ end }}
 	</main>
+	{{ if .ShowFooter }}
+	<footer class="pt-5 mt-auto">
+		<div class="container">
+			<div class="col-12 text-center">
+				<p class="mb-2">&copy; 2025-Present Lorenzo Good EE'30 & Samuel Huang SYDE'30</p>
+				<p><a href="https://github.com/gurtbao/uwececa">Source Code</a></p>
+			</div>
+		</div>
+	</footer>
+	{{ end }}
 </body>
 
 </html>

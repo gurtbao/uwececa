@@ -1,2 +1,19 @@
+{{ define "title" }}Home{{ end }}
+
 {{ define "content" }}
+<div class="row align-items-center my-auto g-5 pb-5 px-2">
+	<div class="col-auto col-sm-6 align-items-center">
+		<img class="d-block mx-auto mx-lg-auto img-fluid" src="/static/goose-home.svg">
+	</div>
+	<div class="col-sm-6">
+		<h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Your Personal Blog, Our Bill.</h1>
+		<p class="lead">Create your personal blog / portfolio in seconds, and have it hosted on our infrastructure @
+			<b>name.year.uwece.ca.</b>
+		</p>
+		<div class="flex">
+			<a class="btn btn-warning" href="/signup">Sign Up Now</a>
+			<a class="btn btn-dark" href="/static/team.txt">Meet the team</a>
+		</div>
+	</div>
+</div>
 {{ end }}
