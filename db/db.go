@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -14,15 +13,21 @@ type DB struct {
 	*sqlx.DB
 }
 
-type Execer interface {
-	Query(query string, args ...any) (*sqlx.Rows, error)
-	QueryContext(ctx context.Context, query string, args ...any) (*sqlx.Rows, error)
-	QueryRow(query string, args ...any) *sqlx.Row
-	QueryRowContext(ctx context.Context, query string, args ...any) *sqlx.Row
-	Exec(query string, args ...any) (sql.Result, error)
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-	Prepare(query string) (*sqlx.Stmt, error)
-	PrepareContext(ctx context.Context, query string) (*sqlx.Stmt, error)
+type Ex interface {
+	sqlx.Queryer
+	sqlx.QueryerContext
+	sqlx.Execer
+	sqlx.ExecerContext
+	sqlx.Preparer
+	sqlx.PreparerContext
+}
+
+func GetContext(ctx context.Context, q Ex, dest any, query string, args ...any) error {
+	return sqlx.GetContext(ctx, q, dest, query, args...)
+}
+
+func SelectContext(ctx context.Context, q Ex, dest any, query string, args ...any) error {
+	return sqlx.SelectContext(ctx, q, dest, query, args...)
 }
 
 func New(path string) (*DB, error) {
