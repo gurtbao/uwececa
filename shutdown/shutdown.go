@@ -63,7 +63,7 @@ func (s *shutdownmanager) Shutdown(wait time.Duration) {
 
 	ch := make(chan int, 1)
 	go func() {
-		wg.Done()
+		wg.Wait()
 		ch <- 0
 	}()
 
