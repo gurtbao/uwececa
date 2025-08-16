@@ -3,7 +3,6 @@ package db_test
 import (
 	"testing"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
 	"uwece.ca/app/db"
 	"uwece.ca/app/db/dbtest"
@@ -16,7 +15,7 @@ func TestMigrations(t *testing.T) {
 	d := dbtest.GetTestDB(t)
 
 	err := d.RunMigrations([]db.Migration{
-		db.FuncMigration("hallo", func(tx *sqlx.Tx) error {
+		db.FuncMigration("hallo", func(tx db.Ex) error {
 			_, err := tx.Exec(`
 				create table if not exists migration_testing (id integer primary key);
 		
@@ -29,7 +28,7 @@ func TestMigrations(t *testing.T) {
 			return nil
 		}),
 
-		db.FuncMigration("hallo", func(tx *sqlx.Tx) error {
+		db.FuncMigration("hallo", func(tx db.Ex) error {
 			_, err := tx.Exec("delete from migration_testing")
 			if err != nil {
 				return err

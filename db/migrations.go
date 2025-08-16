@@ -3,16 +3,14 @@ package db
 import (
 	"fmt"
 	"log/slog"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type Migration struct {
 	Name string
-	Func func(tx *sqlx.Tx) error
+	Func func(tx Ex) error
 }
 
-func FuncMigration(name string, fn func(tx *sqlx.Tx) error) Migration {
+func FuncMigration(name string, fn func(tx Ex) error) Migration {
 	return Migration{
 		Name: name,
 		Func: fn,

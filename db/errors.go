@@ -19,20 +19,28 @@ func HandleError(err error) error {
 		return ErrNoRows
 	}
 
-	if errors.Is(err, sqlite.ErrConstraintForeignKey) {
-		return ErrForeignKey
-	}
+	var sqliteErr sqlite.Error
+	if errors.As(err, &sqliteErr) {
+		err := sqliteErr.ExtendedCode
+		if errors.Is(err, sqlite.ErrConstraintUnique) {
+			return ErrUnique
+		}
 
-	if errors.Is(err, sqlite.ErrConstraintNotNull) {
-		return ErrNotNull
-	}
+		if errors.Is(err, sqlite.ErrConstraintForeignKey) {
+			return ErrForeignKey
+		}
 
-	if errors.Is(err, sqlite.ErrConstraintPrimaryKey) {
-		return ErrUnique
-	}
+		if errors.Is(err, sqlite.ErrConstraintNotNull) {
+			return ErrNotNull
+		}
 
-	if errors.Is(err, sqlite.ErrConstraintUnique) {
-		return ErrUnique
+		if errors.Is(err, sqlite.ErrConstraintPrimaryKey) {
+			return ErrUnique
+		}
+
+		if errors.Is(err, sqlite.ErrConstraintUnique) {
+			return ErrUnique
+		}
 	}
 
 	return err
