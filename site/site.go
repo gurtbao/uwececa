@@ -114,5 +114,5 @@ func HxLocation(w http.ResponseWriter, target string) {
 }
 
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
-	s.RenderPlain(w, http.StatusOK, "home", nil)
+	s.RenderTemplate(w, http.StatusOK, "home", "layouts/base", nil)
 }
