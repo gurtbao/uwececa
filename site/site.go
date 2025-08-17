@@ -50,6 +50,8 @@ func (s *Site) Routes() http.Handler {
 
 	r.Handle("/static/*", s.Static())
 	r.Get("/", s.Index)
+	r.Get("/login", s.LoginPage)
+	r.Get("/signup", s.SignupPage)
 
 	r.NotFound(s.NotFound)
 
