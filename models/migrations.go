@@ -11,9 +11,9 @@ var Migrations = []db.Migration{
     			id INTEGER PRIMARY KEY AUTOINCREMENT,
     			email VARCHAR(255) NOT NULL UNIQUE,
     			password VARCHAR(255) NOT NULL,
-    			verified_at integer,
-    			created_at integer NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    			updated_at integer NOT NULL DEFAULT CURRENT_TIMESTAMP
+    			verified_at timestamp,
+    			created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    			updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 			);
 		`)
 		return err

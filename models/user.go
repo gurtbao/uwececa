@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"time"
 
 	"uwece.ca/app/db"
 )
@@ -13,9 +14,9 @@ type User struct {
 
 	Password string `db:"password"`
 
-	VerifiedAt *string `db:"verified_at"`
-	CreatedAt  string  `db:"created_at"`
-	UpdatedAt  string  `db:"updated_at"`
+	VerifiedAt *time.Time `db:"verified_at"`
+	CreatedAt  time.Time  `db:"created_at"`
+	UpdatedAt  time.Time  `db:"updated_at"`
 }
 
 type NewUser struct {
