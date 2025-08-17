@@ -18,4 +18,18 @@ var Migrations = []db.Migration{
 		`)
 		return err
 	}),
+	db.FuncMigration("0002_add_sessions", func(tx db.Ex) error {
+		_, err := tx.Exec(`
+			CREATE TABLE IF NOT EXISTS sessions (
+				id integer primary key AUTOINCREMENT,
+				user_id integer not null references users (id),
+				token varchar(32) not null,
+				expires timestamp not null 
+			);
+
+			create index sessions_user_id_idx on sessions (user_id);
+			create index sessions_token_idx on sessions (token);
+		`)
+		return err
+	}),
 }
