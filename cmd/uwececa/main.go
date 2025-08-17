@@ -13,6 +13,7 @@ import (
 
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
+	"uwece.ca/app/models"
 	"uwece.ca/app/shutdown"
 	"uwece.ca/app/site"
 )
@@ -48,6 +49,10 @@ func run(ctx context.Context) error {
 	db, err := db.New(cfg.DB.Location)
 	if err != nil {
 		return fmt.Errorf("error opening db: %w", err)
+	}
+
+	if err := db.RunMigrations(models.Migrations); err != nil {
+		return fmt.Errorf("error running db migrations: %w", err)
 	}
 
 	mainsite := site.New(cfg, db)
