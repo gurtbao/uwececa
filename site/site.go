@@ -134,3 +134,13 @@ type fullPageErrorParams struct {
 func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) {
 	s.RenderTemplate(w, params.Code, "error", "layouts/base", params)
 }
+
+type alertErrorParams struct {
+	Variant    string
+	Message    string
+	SwapTarget string
+}
+
+func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) {
+	s.RenderPlain(w, http.StatusOK, "alert-error", params)
+}
