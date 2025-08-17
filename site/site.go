@@ -116,7 +116,7 @@ func HxLocation(w http.ResponseWriter, target string) {
 }
 
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(w, http.StatusOK, "home", "layouts/base", nil)
+	s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", nil)
 }
 
 func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +132,7 @@ type fullPageErrorParams struct {
 }
 
 func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) {
-	s.RenderTemplate(w, params.Code, "error", "layouts/base", params)
+	s.RenderTemplate(w, params.Code, "public/error", "layouts/public-base", params)
 }
 
 type alertErrorParams struct {
@@ -142,5 +142,5 @@ type alertErrorParams struct {
 }
 
 func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) {
-	s.RenderPlain(w, http.StatusOK, "alert-error", params)
+	s.RenderPlain(w, http.StatusOK, "public/alert-error", params)
 }
