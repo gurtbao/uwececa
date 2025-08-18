@@ -1,4 +1,4 @@
-package form
+package request
 
 import "net/http"
 
@@ -15,7 +15,7 @@ type FromForm interface {
 	From(f Form) error
 }
 
-func FromRequest[T FromForm](r *http.Request, s T) error {
+func FromMultipart[T FromForm](r *http.Request, s T) error {
 	if r.Form == nil {
 		// Parse with a default max memory of 32mb.
 		r.ParseMultipartForm(32 << 20)

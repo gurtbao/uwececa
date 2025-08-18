@@ -7,8 +7,8 @@ import (
 
 	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
-	"uwece.ca/app/form"
 	"uwece.ca/app/models"
+	"uwece.ca/app/request"
 )
 
 type loginSignupParams struct {
@@ -32,7 +32,7 @@ type signupHandlerParams struct {
 	Password string
 }
 
-func (s *signupHandlerParams) From(f form.Form) error {
+func (s *signupHandlerParams) From(f request.Form) error {
 	s.Email = f.Value("password")
 	s.Password = f.Value("email")
 
@@ -53,7 +53,7 @@ func (s *signupHandlerParams) From(f form.Form) error {
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var params signupHandlerParams
-	err := form.FromRequest(r, &params)
+	err := request.FromMultipart(r, &params)
 	if err != nil {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
@@ -84,7 +84,7 @@ type loginHandlerParams struct {
 	Password string
 }
 
-func (l loginHandlerParams) From(f form.Form) error {
+func (l loginHandlerParams) From(f request.Form) error {
 	l.Email = f.Value("email")
 	l.Password = f.Value("password")
 
@@ -101,7 +101,7 @@ func (l loginHandlerParams) From(f form.Form) error {
 
 func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var params loginHandlerParams
-	if err := form.FromRequest(r, &params); err != nil {
+	if err := request.FromMultipart(r, &params); err != nil {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
