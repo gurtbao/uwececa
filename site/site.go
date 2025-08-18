@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-
 	chimd "github.com/go-chi/chi/v5/middleware"
+
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
 	"uwece.ca/app/middleware"
@@ -50,8 +50,12 @@ func (s *Site) Routes() http.Handler {
 
 	r.Handle("/static/*", s.Static())
 	r.Get("/", s.Index)
+
 	r.Get("/login", s.LoginPage)
+	r.Post("/login", s.LoginHandler())
+
 	r.Get("/signup", s.SignupPage)
+	r.Post("/signup", s.SignupHandler)
 
 	r.NotFound(s.NotFound)
 
@@ -138,9 +142,8 @@ func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) 
 }
 
 type alertErrorParams struct {
-	Variant    string
-	Message    string
-	SwapTarget string
+	Variant string
+	Message string
 }
 
 func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) {
