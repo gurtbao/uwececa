@@ -52,7 +52,7 @@ func (s *Site) Routes() http.Handler {
 	r.Get("/", s.Index)
 
 	r.Get("/login", s.LoginPage)
-	r.Post("/login", s.LoginHandler())
+	r.Post("/login", s.LoginHandler)
 
 	r.Get("/signup", s.SignupPage)
 	r.Post("/signup", s.SignupHandler)
