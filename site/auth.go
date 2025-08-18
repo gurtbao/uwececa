@@ -9,6 +9,8 @@ import (
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
 	"uwece.ca/app/request"
+	"uwece.ca/app/form"
+	"uwece.ca/app/models"
 )
 
 type loginSignupParams struct {
@@ -33,8 +35,8 @@ type signupHandlerParams struct {
 }
 
 func (s *signupHandlerParams) From(f request.Form) error {
-	s.Email = f.Value("password")
-	s.Password = f.Value("email")
+	s.Email = f.Value("email")
+	s.Password = f.Value("password")
 
 	if _, err := mail.ParseAddress(s.Email); err != nil {
 		return errors.New("Please provide a valid email.")
@@ -53,7 +55,11 @@ func (s *signupHandlerParams) From(f request.Form) error {
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var params signupHandlerParams
+<<<<<<< HEAD
 	err := request.FromMultipart(r, &params)
+=======
+	err := form.FromRequest(r, &params)
+>>>>>>> 4b4e84b (site: Add login / signup flow.)
 	if err != nil {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
@@ -84,7 +90,11 @@ type loginHandlerParams struct {
 	Password string
 }
 
+<<<<<<< HEAD
 func (l loginHandlerParams) From(f request.Form) error {
+=======
+func (l loginHandlerParams) From(f form.Form) error {
+>>>>>>> 4b4e84b (site: Add login / signup flow.)
 	l.Email = f.Value("email")
 	l.Password = f.Value("password")
 
