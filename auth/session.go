@@ -62,3 +62,18 @@ func GetSession(r *http.Request) (Session, bool) {
 
 	return s, true
 }
+
+func DeleteSession(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:   cookieName,
+		Value:  "deleted",
+		Quoted: false,
+
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		Expires:  time.Now(),
+	}
+
+	http.SetCookie(w, cookie)
+}

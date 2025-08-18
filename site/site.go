@@ -49,15 +49,19 @@ func (s *Site) Routes() http.Handler {
 	r.Use(chimd.Compress(5))
 
 	r.Handle("/static/*", s.Static())
-	r.Get("/", s.Index)
 
-	r.Get("/login", s.LoginPage)
-	r.Post("/login", s.LoginHandler)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.LoadUser(s.db))
+		r.Get("/", s.Index)
 
-	r.Get("/signup", s.SignupPage)
-	r.Post("/signup", s.SignupHandler)
+		r.Get("/login", s.LoginPage)
+		r.Post("/login", s.LoginHandler)
 
-	r.NotFound(s.NotFound)
+		r.Get("/signup", s.SignupPage)
+		r.Post("/signup", s.SignupHandler)
+
+		r.NotFound(s.NotFound)
+	})
 
 	return r
 }
@@ -119,6 +123,11 @@ func HxRedirect(w http.ResponseWriter, target string) {
 func HxLocation(w http.ResponseWriter, target string) {
 	w.Header().Set("HX-Location", target)
 	w.WriteHeader(http.StatusOK)
+}
+
+func Redirect(w http.ResponseWriter, target string) {
+	w.Header().Set("Location", target)
+	w.WriteHeader(http.StatusFound)
 }
 
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
