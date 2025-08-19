@@ -32,4 +32,18 @@ var Migrations = []db.Migration{
 		`)
 		return err
 	}),
+	db.FuncMigration("0003_add_email_links", func(tx db.Ex) error {
+		_, err := tx.Exec(`
+			CREATE TABLE IF NOT EXISTS emails (
+				id integer primary key AUTOINCREMENT,
+				user_id integer not null references users (id),
+				token varchar(32) not null,
+				expires timestamp not null 
+			);
+
+			create index emails_user_id_idx on sessions (user_id);
+			create index emails_token_idx on sessions (token);
+		`)
+		return err
+	}),
 }
