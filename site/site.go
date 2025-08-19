@@ -13,6 +13,7 @@ import (
 
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
+	"uwece.ca/app/email"
 	"uwece.ca/app/middleware"
 	"uwece.ca/app/templates"
 )
@@ -25,6 +26,7 @@ type Site struct {
 	db        *db.DB
 	templates *templates.Templates
 	embedFS   embed.FS
+	mailer    *email.Mailer
 }
 
 func New(c *config.Config, db *db.DB) *Site {
@@ -40,6 +42,7 @@ func New(c *config.Config, db *db.DB) *Site {
 		db:        db,
 		templates: tmpl,
 		embedFS:   embedFS,
+		mailer:    email.NewMailer(c),
 	}
 }
 
