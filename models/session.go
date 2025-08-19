@@ -5,19 +5,20 @@ import (
 	"errors"
 	"time"
 
+	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
 )
 
 type Session struct {
-	Id      int       `db:"id"`
-	UserId  int       `db:"user_id"`
-	Token   string    `db:"token"`
-	Expires time.Time `db:"expires"`
+	Id      int        `db:"id"`
+	UserId  int        `db:"user_id"`
+	Token   auth.Token `db:"token"`
+	Expires time.Time  `db:"expires"`
 }
 
 type NewSession struct {
 	UserId  int
-	Token   string
+	Token   auth.Token
 	Expires time.Time
 }
 

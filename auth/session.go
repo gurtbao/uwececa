@@ -1,9 +1,6 @@
 package auth
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -11,24 +8,17 @@ import (
 const (
 	cookieName  = "uwececa_session_token_v1"
 	expiryHours = 48
-	tokenBytes  = 32
 )
 
 type Session struct {
-	Token  string
+	Token  Token
 	Expiry time.Time
 }
 
 // Create a new session token (a hex encoded string of len tokenBytes).
 func NewSession() Session {
-	token := make([]byte, tokenBytes)
-	_, err := rand.Read(token)
-	if err != nil {
-		panic(fmt.Sprintf("error reading bytes for session token: %v", err))
-	}
-
 	return Session{
-		Token:  hex.EncodeToString(token),
+		Token:  NewToken(),
 		Expiry: time.Now().Add(expiryHours * time.Hour),
 	}
 }
@@ -37,7 +27,7 @@ func NewSession() Session {
 func AddSession(w http.ResponseWriter, s Session) {
 	cookie := &http.Cookie{
 		Name:   cookieName,
-		Value:  s.Token,
+		Value:  string(s.Token),
 		Quoted: false,
 
 		SameSite: http.SameSiteStrictMode,
@@ -56,7 +46,7 @@ func GetSession(r *http.Request) (Session, bool) {
 	}
 
 	s := Session{
-		Token:  cookie.Value,
+		Token:  Token(cookie.Value),
 		Expiry: cookie.Expires,
 	}
 
