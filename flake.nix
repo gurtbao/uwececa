@@ -22,6 +22,7 @@
           pkgs.nixos-shell
           pkgs.coreutils
           pkgs.gcc
+          pkgs.mailpit
         ];
 
         env.CGO_ENABLED = 1;
