@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# If .env exists, export the .env variables.
+if [[ -f .env ]]; then
+	export $(cat .env | xargs)
+fi
+
+# Devmode things.
+export SLOG_DEBUG=1 UWECECA_DEVELOPMENT=1
+
+go run cmd/uwececa/main.go
