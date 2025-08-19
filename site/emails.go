@@ -14,7 +14,7 @@ func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error 
 		Link template.HTML
 	}{
 		Name: name,
-		Link: template.HTML(token),
+		Link: template.HTML(fmt.Sprintf("%s/signup/verify/%s", s.config.Core.BaseDomain, token)),
 	}
 
 	text, err := s.templates.ExecutePlainString("emails/verification.txt", params)
@@ -30,7 +30,7 @@ func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error 
 	err = s.mailer.SendMessage(email.Message{
 		To:       addr,
 		Name:     name,
-		Subject:  "UWECECA - Verification.",
+		Subject:  "UWECECA - Verification",
 		TextBody: text,
 		HtmlBody: html,
 	})

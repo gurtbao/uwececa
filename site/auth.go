@@ -2,14 +2,19 @@ package site
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/mail"
+	"time"
 
 	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
 	"uwece.ca/app/request"
 )
+
+// Verification emails will expire in 48 hrs.
+const emailExpiryHours = 48
 
 type loginSignupParams struct {
 	Variant string
@@ -64,11 +69,33 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	password := auth.HashPassword(params.Password)
 
-	_, err = models.InsertUser(r.Context(), s.db, models.NewUser{
+	usr, err := models.InsertUser(r.Context(), s.db, models.NewUser{
 		Email:    params.Email,
 		Password: password,
 	})
 	if err != nil {
+		s.AlertError(w, alertErrorParams{
+			Variant: "danger",
+			Message: "Something went wrong, please try again.",
+		})
+		return
+	}
+
+	em, err := models.InsertEmail(r.Context(), s.db, models.NewEmail{
+		Token:   auth.NewToken(),
+		UserId:  usr.Id,
+		Expires: time.Now().Add(emailExpiryHours * time.Hour),
+	})
+	if err != nil {
+		s.AlertError(w, alertErrorParams{
+			Variant: "danger",
+			Message: "Something went wrong, please try again.",
+		})
+		return
+	}
+
+	if err := s.SendVerificationEmail(usr.Email, "User", em.Token); err != nil {
+		slog.Error("failed sending verification email", "error", err)
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
