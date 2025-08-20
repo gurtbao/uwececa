@@ -1,13 +1,13 @@
-{{ define "title" }}{{ .Variant}}{{ end }}
+{{ define "title" }}{{ .Data.Variant}}{{ end }}
 
 {{ define "content" }}
 <div class="flex flex-column align-items-center flex-grow-1 justify-content-center m-0 mx-sm-4">
 	<div class="mx-auto mt-5 col-sm-12 col-md-6">
-		<h2 class=" fs-3 mb-3">{{ .Variant }}:</h2>
+		<h2 class=" fs-3 mb-3">{{ .Data.Variant }}:</h2>
 		<div id="error-target">
 		</div>
 		<div>
-			{{ if eq .Variant "Login" }}
+			{{ if eq .Data.Variant "Login" }}
 			<form hx-post="/login" hx-target="#error-target" hx-swap="innerHTML">
 				<div class="mb-3">
 					<label for="loginEmail" class="form-label">Email:</label>
@@ -26,7 +26,7 @@
 				<p class="text-center mt-3">Don't Have an Account? <a href="/signup">Sign Up Instead</a></p>
 			</form>
 			{{ end }}
-			{{ if eq .Variant "Signup" }}
+			{{ if eq .Data.Variant "Signup" }}
 			<form hx-post="/signup" hx-target="#error-target" , hx-swap="innerHTML">
 				<div class="mb-3">
 					<label for="signupEmail" class="form-label">Waterloo Email:</label>

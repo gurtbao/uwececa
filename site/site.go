@@ -93,12 +93,16 @@ func (s *Site) UnhandledError(w http.ResponseWriter, err error) {
 	}
 }
 
-func (s *Site) RenderPlain(w http.ResponseWriter, statusCode int, name string, params any) error {
-	return s.RenderTemplate(w, statusCode, name, "", params)
+func (s *Site) RenderPlain(w http.ResponseWriter, r *http.Request, statusCode int, name string, params any) error {
+	return s.RenderTemplate(w, r, statusCode, name, "", params)
 }
 
-func (s *Site) RenderTemplate(w http.ResponseWriter, statusCode int, name, base string, params any) error {
-	err := s.templates.Execute(name, w, base, params)
+func (s *Site) RenderTemplate(w http.ResponseWriter, r *http.Request, statusCode int, name, base string, params any) error {
+	p := PageParams{
+		Data:         params,
+		LoggedInUser: middleware.GetUserRef(r),
+	}
+	err := s.templates.Execute(name, w, base, p)
 	if err != nil {
 		return err
 	}
@@ -126,38 +130,27 @@ func (s *Site) Static() http.Handler {
 // Params for a base page.
 type PageParams struct {
 	LoggedInUser *models.User
-}
-
-func PageParamsFromReq(r *http.Request) PageParams {
-	return PageParams{
-		LoggedInUser: middleware.GetUserRef(r),
-	}
+	Data         any
 }
 
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) error {
-	return s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", PageParamsFromReq(r))
+	return s.RenderTemplate(w, r, http.StatusOK, "public/home", "layouts/public-base", nil)
 }
 
 func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) error {
-	return s.FullpageError(w, newFullpageErrorParams(r, http.StatusNotFound, "Resouce Not Found."))
+	return s.FullpageError(w, r, fullPageErrorParams{
+		Code:    http.StatusNotFound,
+		Message: "Resource not found.",
+	})
 }
 
 type fullPageErrorParams struct {
-	PageParams
 	Code    int
 	Message string
 }
 
-func newFullpageErrorParams(r *http.Request, code int, message string) fullPageErrorParams {
-	return fullPageErrorParams{
-		PageParams: PageParamsFromReq(r),
-		Code:       code,
-		Message:    message,
-	}
-}
-
-func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) error {
-	return s.RenderTemplate(w, params.Code, "public/error", "layouts/public-base", params)
+func (s *Site) FullpageError(w http.ResponseWriter, r *http.Request, params fullPageErrorParams) error {
+	return s.RenderTemplate(w, r, params.Code, "public/error", "layouts/public-base", params)
 }
 
 type alertErrorParams struct {
@@ -165,6 +158,6 @@ type alertErrorParams struct {
 	Message string
 }
 
-func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) error {
-	return s.RenderPlain(w, http.StatusOK, "public/alert-error", params)
+func (s *Site) AlertError(w http.ResponseWriter, r *http.Request, params alertErrorParams) error {
+	return s.RenderPlain(w, r, http.StatusOK, "public/alert-error", params)
 }

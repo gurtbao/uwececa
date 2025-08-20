@@ -19,26 +19,22 @@ import (
 const emailExpiryHours = 48
 
 type loginSignupParams struct {
-	PageParams
 	Variant string
 }
 
 func (s *Site) LoginPage(w http.ResponseWriter, r *http.Request) error {
-	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
-		PageParams: PageParamsFromReq(r),
-		Variant:    "Login",
+	return s.RenderTemplate(w, r, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
+		Variant: "Login",
 	})
 }
 
 func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) error {
-	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
-		PageParams: PageParamsFromReq(r),
-		Variant:    "Signup",
+	return s.RenderTemplate(w, r, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
+		Variant: "Signup",
 	})
 }
 
 type emailVerificationPageParams struct {
-	PageParams
 	Email string
 	Name  string
 }
@@ -55,8 +51,7 @@ func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) err
 	if err := web.FromMultipart(r, &params); err != nil {
 		return err
 	}
-	params.PageParams = PageParamsFromReq(r)
-	return s.RenderTemplate(w, http.StatusOK, "public/email-verification", "layouts/public-base", params)
+	return s.RenderTemplate(w, r, http.StatusOK, "public/email-verification", "layouts/public-base", params)
 }
 
 type signupHandlerParams struct {
@@ -93,7 +88,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 	var params signupHandlerParams
 	err := web.FromMultipart(r, &params)
 	if err != nil {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
 		})
@@ -101,7 +96,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 
 	if s.config.Core.RequiredEmailSuffix != "" {
 		if !strings.HasSuffix(params.Email, s.config.Core.RequiredEmailSuffix) {
-			return s.AlertError(w, alertErrorParams{
+			return s.AlertError(w, r, alertErrorParams{
 				Variant: "danger",
 				Message: fmt.Sprintf("Please use your email with the suffix: %s (will be verified).", s.config.Core.RequiredEmailSuffix),
 			})
@@ -116,7 +111,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		Name:     params.Name,
 	})
 	if err != nil {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
@@ -128,7 +123,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		Expires: time.Now().Add(emailExpiryHours * time.Hour),
 	})
 	if err != nil {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
@@ -136,7 +131,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 
 	if err := s.SendVerificationEmail(usr.Email, usr.Name, em.Token); err != nil {
 		slog.Error("failed sending verification email", "error", err, "email", usr.Email)
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
@@ -168,7 +163,7 @@ func (l *loginHandlerParams) From(f web.Form) error {
 func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 	var params loginHandlerParams
 	if err := web.FromMultipart(r, &params); err != nil {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
 		})
@@ -177,7 +172,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 	usr, err := models.GetUser(r.Context(), s.db, db.FilterEq("email", params.Email))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
-			return s.AlertError(w, alertErrorParams{
+			return s.AlertError(w, r, alertErrorParams{
 				Variant: "danger",
 				Message: "No verified users found with that email and password.",
 			})
@@ -186,7 +181,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if usr.VerifiedAt == nil {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "No verified users found with that email and password.",
 		})
@@ -194,7 +189,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 
 	ok := auth.MustVerifyPassword(params.Password, usr.Password)
 	if !ok {
-		return s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "No verified users found with that email and password.",
 		})
@@ -220,7 +215,7 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 	e, err := models.GetEmail(r.Context(), s.db, db.FilterEq("token", token))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
-			return s.FullpageError(w, fullPageErrorParams{
+			return s.FullpageError(w, r, fullPageErrorParams{
 				Code:    http.StatusNotFound,
 				Message: "Token not found.",
 			})
@@ -230,7 +225,7 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 
 	if time.Now().After(e.Expires) {
 		if errors.Is(err, db.ErrNoRows) {
-			return s.FullpageError(w, fullPageErrorParams{
+			return s.FullpageError(w, r, fullPageErrorParams{
 				Code:    http.StatusNotFound,
 				Message: "Token not found.",
 			})
