@@ -119,26 +119,6 @@ func (s *Site) Static() http.Handler {
 	return http.StripPrefix("/static", http.FileServer(http.FS(sub)))
 }
 
-func HxRefresh(w http.ResponseWriter) {
-	w.Header().Set("HX-Refresh", "true")
-	w.WriteHeader(http.StatusOK)
-}
-
-func HxRedirect(w http.ResponseWriter, target string) {
-	w.Header().Set("HX-Redirect", target)
-	w.WriteHeader(http.StatusOK)
-}
-
-func HxLocation(w http.ResponseWriter, target string) {
-	w.Header().Set("HX-Location", target)
-	w.WriteHeader(http.StatusOK)
-}
-
-func Redirect(w http.ResponseWriter, target string) {
-	w.Header().Set("Location", target)
-	w.WriteHeader(http.StatusFound)
-}
-
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
 	s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", nil)
 }

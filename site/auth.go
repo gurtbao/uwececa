@@ -136,7 +136,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
+	web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
 }
 
 type loginHandlerParams struct {
@@ -211,7 +211,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	auth.AddSession(w, session)
 
-	HxRedirect(w, "/")
+	web.HxRedirect(w, "/")
 }
 
 func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) {
@@ -250,5 +250,5 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 
 	slog.Info("verified user", "id", e.UserId)
 
-	Redirect(w, "/login")
+	web.Redirect(w, "/login")
 }
