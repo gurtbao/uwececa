@@ -32,7 +32,6 @@ func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error 
 	if err != nil {
 		return fmt.Errorf("error rendering email html template: %w", err)
 	}
-	fmt.Println(html)
 
 	err = s.mailer.SendMessage(email.Message{
 		To:       addr,
