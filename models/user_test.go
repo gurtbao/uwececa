@@ -3,6 +3,7 @@ package models_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"uwece.ca/app/db"
@@ -81,4 +82,23 @@ func TestUserGet(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, usr, result)
+}
+
+func TestVerifyUser(t *testing.T) {
+	t.Parallel()
+	d := dbtest.GetTestDB(t)
+	require.NoError(t, d.RunMigrations(models.Migrations))
+
+	id := SeedUser(t, d)
+
+	start := time.Now()
+
+	err := models.VerifyUser(context.Background(), d, db.FilterEq("id", id))
+	require.NoError(t, err)
+
+	usr, err := models.GetUser(context.Background(), d, db.FilterEq("id", id))
+	require.NoError(t, err)
+
+	require.NotNil(t, usr.VerifiedAt)
+	require.True(t, start.Before(usr.UpdatedAt))
 }

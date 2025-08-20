@@ -51,3 +51,17 @@ func GetUser(ctx context.Context, d db.Ex, filters ...db.Filter) (User, error) {
 
 	return usr, nil
 }
+
+func VerifyUser(ctx context.Context, d db.Ex, filters ...db.Filter) error {
+	where, args := db.BuildWhere(filters)
+	now := time.Now()
+
+	newArgs := []any{now, now}
+	newArgs = append(newArgs, args...)
+
+	if _, err := d.ExecContext(ctx, `update users set verified_at = ?, updated_at = ?`+where, newArgs...); err != nil {
+		return db.HandleError(err)
+	}
+
+	return nil
+}
