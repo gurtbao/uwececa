@@ -71,15 +71,21 @@ func LoadUser(d *db.DB) func(next http.Handler) http.Handler {
 	}
 }
 
-func RequireLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, ok := GetUser(r)
-		if !ok {
-			w.Header().Set("Location", "/login")
-			w.WriteHeader(http.StatusFound)
-			return
-		}
+func RequireLogin(t bool) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, ok := GetUser(r)
+			if !ok == t {
+				if t {
+					w.Header().Set("Location", "/login")
+				} else {
+					w.Header().Set("Location", "/")
+				}
+				w.WriteHeader(http.StatusFound)
+				return
+			}
 
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }
