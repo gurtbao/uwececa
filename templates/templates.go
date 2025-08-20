@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"html/template"
@@ -181,6 +182,19 @@ func (p *Templates) ExecutePlain(name string, w io.Writer, params any) error {
 
 func (p *Templates) Execute(name string, w io.Writer, base string, params any) error {
 	return p.executeReload(name, w, base, params)
+}
+
+func (p *Templates) ExecuteString(name string, base string, params any) (string, error) {
+	var buffer bytes.Buffer
+	if err := p.Execute(name, &buffer, base, params); err != nil {
+		return "", nil
+	}
+
+	return buffer.String(), nil
+}
+
+func (p *Templates) ExecutePlainString(name string, params any) (string, error) {
+	return p.ExecuteString(name, "", params)
 }
 
 func (p *Templates) executeReload(name string, w io.Writer, base string, params any) error {
