@@ -6,9 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 	"net/mail"
+	"strings"
 	"time"
 
 	"uwece.ca/app/auth"
+	"uwece.ca/app/config"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
 	"uwece.ca/app/request"
@@ -57,6 +59,7 @@ func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) {
 type signupHandlerParams struct {
 	Email    string
 	Password string
+	cfg      *config.Config
 }
 
 func (s *signupHandlerParams) From(f request.Form) error {
@@ -75,11 +78,18 @@ func (s *signupHandlerParams) From(f request.Form) error {
 		return errors.New("Password and password confirm must match.")
 	}
 
+	if s.cfg.Core.RequiredEmailSuffix != "" {
+		if !strings.HasSuffix(s.Email, s.cfg.Core.RequiredEmailSuffix) {
+			return fmt.Errorf("Please use your email with the suffix: %s (will be verified).", s.cfg.Core.RequiredEmailSuffix)
+		}
+	}
+
 	return nil
 }
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var params signupHandlerParams
+	params.cfg = s.config
 	err := request.FromMultipart(r, &params)
 	if err != nil {
 		s.AlertError(w, alertErrorParams{
@@ -162,7 +172,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, db.ErrNoRows) {
 			s.AlertError(w, alertErrorParams{
 				Variant: "danger",
-				Message: "No users found with that email and password.",
+				Message: "No verified users found with that email and password.",
 			})
 			return
 		}
@@ -170,11 +180,19 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if usr.VerifiedAt == nil {
+		s.AlertError(w, alertErrorParams{
+			Variant: "danger",
+			Message: "No verified users found with that email and password.",
+		})
+		return
+	}
+
 	ok := auth.MustVerifyPassword(params.Password, usr.Password)
 	if !ok {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
-			Message: "No users found with that email and password.",
+			Message: "No verified users found with that email and password.",
 		})
 		return
 	}
