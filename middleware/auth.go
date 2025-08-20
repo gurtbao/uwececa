@@ -60,6 +60,7 @@ func LoadUser(d *db.DB) func(next http.Handler) http.Handler {
 			usr, err := loadUser(d, w, r)
 			if err != nil {
 				next.ServeHTTP(w, r)
+				return
 			}
 			ctx := context.WithValue(r.Context(), userContextKey, usr)
 
