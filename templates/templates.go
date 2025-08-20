@@ -109,7 +109,7 @@ func (p *Templates) loadAllTemplates() {
 			os.Exit(1)
 		}
 		templates[name] = tmpl
-		slog.Debug("loaded template", "name", "name")
+		slog.Debug("loaded template", "name", name)
 		return nil
 	})
 	if err != nil {
