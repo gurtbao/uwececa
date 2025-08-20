@@ -10,10 +10,9 @@ import (
 	"time"
 
 	"uwece.ca/app/auth"
-	"uwece.ca/app/config"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
-	"uwece.ca/app/request"
+	"uwece.ca/app/web"
 )
 
 // Verification emails will expire in 48 hrs.
@@ -40,7 +39,7 @@ type emailVerificationPageParams struct {
 	Name  string
 }
 
-func (s *emailVerificationPageParams) From(f request.Form) error {
+func (s *emailVerificationPageParams) From(f web.Form) error {
 	s.Email = f.Value("email")
 	s.Name = f.Value("name")
 
@@ -49,7 +48,7 @@ func (s *emailVerificationPageParams) From(f request.Form) error {
 
 func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) {
 	var params emailVerificationPageParams
-	if err := request.FromMultipart(r, &params); err != nil {
+	if err := web.FromMultipart(r, &params); err != nil {
 		s.UnhandledError(w, err)
 		return
 	}
@@ -61,7 +60,7 @@ type signupHandlerParams struct {
 	Password string
 }
 
-func (s *signupHandlerParams) From(f request.Form) error {
+func (s *signupHandlerParams) From(f web.Form) error {
 	s.Email = f.Value("email")
 	s.Password = f.Value("password")
 
@@ -70,7 +69,7 @@ func (s *signupHandlerParams) From(f request.Form) error {
 	}
 
 	if len(s.Password) < 12 {
-		return errors.New("Please provide a password of length 12 or greater.")
+		return errors.New("Please provide a passwordof length 12 or greater.")
 	}
 
 	if s.Password != f.Value("password-confirm") {
@@ -82,7 +81,7 @@ func (s *signupHandlerParams) From(f request.Form) error {
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var params signupHandlerParams
-	err := request.FromMultipart(r, &params)
+	err := web.FromMultipart(r, &params)
 	if err != nil {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
@@ -145,7 +144,7 @@ type loginHandlerParams struct {
 	Password string
 }
 
-func (l *loginHandlerParams) From(f request.Form) error {
+func (l *loginHandlerParams) From(f web.Form) error {
 	l.Email = f.Value("email")
 	l.Password = f.Value("password")
 
@@ -162,7 +161,7 @@ func (l *loginHandlerParams) From(f request.Form) error {
 
 func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var params loginHandlerParams
-	if err := request.FromMultipart(r, &params); err != nil {
+	if err := web.FromMultipart(r, &params); err != nil {
 		s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
