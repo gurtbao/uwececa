@@ -20,6 +20,7 @@ func TestUserInsert(t *testing.T) {
 	ne := models.NewUser{
 		Email:    "me@me.com",
 		Password: "1234",
+		Name:     "Lorenzo",
 	}
 
 	usr, err := models.InsertUser(context.Background(), d, ne)
@@ -27,6 +28,7 @@ func TestUserInsert(t *testing.T) {
 
 	require.Equal(t, ne.Email, usr.Email)
 	require.Equal(t, ne.Password, usr.Password)
+	require.Equal(t, ne.Name, usr.Name)
 }
 
 func TestUserInsertGivesConflictError(t *testing.T) {

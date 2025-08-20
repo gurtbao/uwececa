@@ -57,18 +57,24 @@ func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) err
 type signupHandlerParams struct {
 	Email    string
 	Password string
+	Name     string
 }
 
 func (s *signupHandlerParams) From(f web.Form) error {
 	s.Email = f.Value("email")
 	s.Password = f.Value("password")
+	s.Name = f.Value("name")
 
 	if _, err := mail.ParseAddress(s.Email); err != nil {
 		return errors.New("Please provide a valid email.")
 	}
 
+	if s.Name == "" {
+		return errors.New("Please provide us with a name :).")
+	}
+
 	if len(s.Password) < 12 {
-		return errors.New("Please provide a passwordof length 12 or greater.")
+		return errors.New("Please provide a password of length 12 or greater.")
 	}
 
 	if s.Password != f.Value("password-confirm") {
@@ -102,6 +108,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 	usr, err := models.InsertUser(r.Context(), s.db, models.NewUser{
 		Email:    params.Email,
 		Password: password,
+		Name:     params.Name,
 	})
 	if err != nil {
 		return s.AlertError(w, alertErrorParams{
@@ -122,15 +129,15 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	if err := s.SendVerificationEmail(usr.Email, "User", em.Token); err != nil {
-		slog.Error("failed sending verification email", "error", err)
+	if err := s.SendVerificationEmail(usr.Email, usr.Name, em.Token); err != nil {
+		slog.Error("failed sending verification email", "error", err, "email", usr.Email)
 		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
 	}
 
-	return web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
+	return web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=%s", usr.Email, usr.Name))
 }
 
 type loginHandlerParams struct {
