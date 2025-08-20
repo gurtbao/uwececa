@@ -59,7 +59,6 @@ func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) {
 type signupHandlerParams struct {
 	Email    string
 	Password string
-	cfg      *config.Config
 }
 
 func (s *signupHandlerParams) From(f request.Form) error {
@@ -78,18 +77,11 @@ func (s *signupHandlerParams) From(f request.Form) error {
 		return errors.New("Password and password confirm must match.")
 	}
 
-	if s.cfg.Core.RequiredEmailSuffix != "" {
-		if !strings.HasSuffix(s.Email, s.cfg.Core.RequiredEmailSuffix) {
-			return fmt.Errorf("Please use your email with the suffix: %s (will be verified).", s.cfg.Core.RequiredEmailSuffix)
-		}
-	}
-
 	return nil
 }
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var params signupHandlerParams
-	params.cfg = s.config
 	err := request.FromMultipart(r, &params)
 	if err != nil {
 		s.AlertError(w, alertErrorParams{
@@ -97,6 +89,16 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 			Message: err.Error(),
 		})
 		return
+	}
+
+	if s.config.Core.RequiredEmailSuffix != "" {
+		if !strings.HasSuffix(params.Email, s.config.Core.RequiredEmailSuffix) {
+			s.AlertError(w, alertErrorParams{
+				Variant: "danger",
+				Message: fmt.Sprintf("Please use your email with the suffix: %s (will be verified).", s.config.Core.RequiredEmailSuffix),
+			})
+			return
+		}
 	}
 
 	password := auth.HashPassword(params.Password)
