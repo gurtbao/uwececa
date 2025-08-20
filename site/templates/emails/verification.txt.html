@@ -1,5 +1,5 @@
 {{ define "emails/verification.txt" }}
 Hello {{ .Name }}! We are excited for you to join us.
 
-Verify with the following link: {{ .Link }}.
+Verify with the following link: {{ .Scheme }}://{{ .Link }}.
 {{ end }}

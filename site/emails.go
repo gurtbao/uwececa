@@ -10,11 +10,17 @@ import (
 
 func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error {
 	params := struct {
-		Name string
-		Link template.HTML
+		Name   string
+		Link   template.HTML
+		Scheme string
 	}{
-		Name: name,
-		Link: template.HTML(fmt.Sprintf("%s/signup/verify/%s", s.config.Core.BaseDomain, token)),
+		Name:   name,
+		Scheme: "https",
+		Link:   template.HTML(fmt.Sprintf("%s/signup/verify/%s", s.config.Core.BaseDomain, token)),
+	}
+
+	if s.config.Core.Development {
+		params.Scheme = "http"
 	}
 
 	text, err := s.templates.ExecutePlainString("emails/verification.txt", params)
@@ -26,6 +32,7 @@ func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error 
 	if err != nil {
 		return fmt.Errorf("error rendering email html template: %w", err)
 	}
+	fmt.Println(html)
 
 	err = s.mailer.SendMessage(email.Message{
 		To:       addr,
