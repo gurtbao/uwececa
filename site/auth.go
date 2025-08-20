@@ -133,7 +133,7 @@ type loginHandlerParams struct {
 	Password string
 }
 
-func (l loginHandlerParams) From(f request.Form) error {
+func (l *loginHandlerParams) From(f request.Form) error {
 	l.Email = f.Value("email")
 	l.Password = f.Value("password")
 

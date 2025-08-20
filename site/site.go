@@ -57,13 +57,16 @@ func (s *Site) Routes() http.Handler {
 		r.Use(middleware.LoadUser(s.db))
 		r.Get("/", s.Index)
 
-		r.Get("/login", s.LoginPage)
-		r.Post("/login", s.LoginHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireLogin(false))
+			r.Get("/login", s.LoginPage)
+			r.Post("/login", s.LoginHandler)
 
-		r.Get("/signup", s.SignupPage)
-		r.Post("/signup", s.SignupHandler)
+			r.Get("/signup", s.SignupPage)
+			r.Post("/signup", s.SignupHandler)
 
-		r.Get("/signup/email-verification", s.EmailVerificationPage)
+			r.Get("/signup/email-verification", s.EmailVerificationPage)
+		})
 
 		r.NotFound(s.NotFound)
 	})
