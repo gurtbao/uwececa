@@ -19,22 +19,26 @@ import (
 const emailExpiryHours = 48
 
 type loginSignupParams struct {
+	PageParams
 	Variant string
 }
 
 func (s *Site) LoginPage(w http.ResponseWriter, r *http.Request) error {
 	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
-		Variant: "Login",
+		PageParams: PageParamsFromReq(r),
+		Variant:    "Login",
 	})
 }
 
 func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) error {
 	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
-		Variant: "Signup",
+		PageParams: PageParamsFromReq(r),
+		Variant:    "Signup",
 	})
 }
 
 type emailVerificationPageParams struct {
+	PageParams
 	Email string
 	Name  string
 }
@@ -51,6 +55,7 @@ func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) err
 	if err := web.FromMultipart(r, &params); err != nil {
 		return err
 	}
+	params.PageParams = PageParamsFromReq(r)
 	return s.RenderTemplate(w, http.StatusOK, "public/email-verification", "layouts/public-base", params)
 }
 

@@ -15,6 +15,7 @@ import (
 	"uwece.ca/app/db"
 	"uwece.ca/app/email"
 	"uwece.ca/app/middleware"
+	"uwece.ca/app/models"
 	"uwece.ca/app/templates"
 	"uwece.ca/app/web"
 )
@@ -122,20 +123,37 @@ func (s *Site) Static() http.Handler {
 	return http.StripPrefix("/static", http.FileServer(http.FS(sub)))
 }
 
+// Params for a base page.
+type PageParams struct {
+	LoggedInUser *models.User
+}
+
+func PageParamsFromReq(r *http.Request) PageParams {
+	return PageParams{
+		LoggedInUser: middleware.GetUserRef(r),
+	}
+}
+
 func (s *Site) Index(w http.ResponseWriter, r *http.Request) error {
-	return s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", nil)
+	return s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", PageParamsFromReq(r))
 }
 
 func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) error {
-	return s.FullpageError(w, fullPageErrorParams{
-		Code:    http.StatusNotFound,
-		Message: "Resource Not Found.",
-	})
+	return s.FullpageError(w, newFullpageErrorParams(r, http.StatusNotFound, "Resouce Not Found."))
 }
 
 type fullPageErrorParams struct {
+	PageParams
 	Code    int
 	Message string
+}
+
+func newFullpageErrorParams(r *http.Request, code int, message string) fullPageErrorParams {
+	return fullPageErrorParams{
+		PageParams: PageParamsFromReq(r),
+		Code:       code,
+		Message:    message,
+	}
 }
 
 func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) error {

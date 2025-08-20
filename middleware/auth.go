@@ -54,6 +54,15 @@ func GetUser(r *http.Request) (models.User, bool) {
 	return usr, ok
 }
 
+func GetUserRef(r *http.Request) *models.User {
+	usr, ok := GetUser(r)
+	if !ok {
+		return nil
+	}
+
+	return &usr
+}
+
 func LoadUser(d *db.DB) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

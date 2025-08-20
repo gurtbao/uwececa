@@ -24,7 +24,11 @@
 			<a class="navbar-brand fw-bold">UWaterloo ECE</a>
 
 			<div>
+				{{ if not .LoggedInUser }}
 				<a class="btn btn-outline-dark" href="/login">Login</a>
+				{{ else }}
+				<a class="btn" href="/account">Account</a>
+				{{ end }}
 			</div>
 		</div>
 	</nav>
