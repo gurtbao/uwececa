@@ -63,6 +63,8 @@ func (s *Site) Routes() http.Handler {
 		r.Get("/signup", s.SignupPage)
 		r.Post("/signup", s.SignupHandler)
 
+		r.Get("/signup/email-verification", s.EmailVerificationPage)
+
 		r.NotFound(s.NotFound)
 	})
 

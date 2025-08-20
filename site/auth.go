@@ -2,6 +2,7 @@ package site
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/mail"
@@ -30,6 +31,27 @@ func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) {
 	s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
 		Variant: "Signup",
 	})
+}
+
+type emailVerificationPageParams struct {
+	Email string
+	Name  string
+}
+
+func (s *emailVerificationPageParams) From(f request.Form) error {
+	s.Email = f.Value("email")
+	s.Name = f.Value("name")
+
+	return nil
+}
+
+func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) {
+	var params emailVerificationPageParams
+	if err := request.FromMultipart(r, &params); err != nil {
+		s.UnhandledError(w, err)
+		return
+	}
+	s.RenderTemplate(w, http.StatusOK, "public/email-verification", "layouts/public-base", params)
 }
 
 type signupHandlerParams struct {
@@ -103,7 +125,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	HxRedirect(w, "/login")
+	HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
 }
 
 type loginHandlerParams struct {

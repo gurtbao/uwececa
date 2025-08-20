@@ -1,0 +1,16 @@
+{{ define "title" }}Email Verification{{ end }}
+
+{{ define "content" }}
+<div class="row align-items-center my-auto g-5 pb-5 px-2">
+	<div class="col-auto col-sm-6 align-items-center">
+		<img class="d-block mx-auto mx-lg-auto img-fluid" style="transform:translateY(-4em)"
+			src="/static/goose-wave.svg">
+	</div>
+	<div class="col-sm-6">
+		<h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Welcome to UWECECA!</h1>
+		<p class="lead">A verification email has been sent to {{ .Email }}. Make sure to check your spam folder if you
+			can't find it. If it never shows up and your email address is correct, contact the administrators to get
+			verified manually.</p>
+	</div>
+</div>
+{{ end }}
