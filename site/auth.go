@@ -22,14 +22,14 @@ type loginSignupParams struct {
 	Variant string
 }
 
-func (s *Site) LoginPage(w http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
+func (s *Site) LoginPage(w http.ResponseWriter, r *http.Request) error {
+	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
 		Variant: "Login",
 	})
 }
 
-func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
+func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) error {
+	return s.RenderTemplate(w, http.StatusOK, "public/login-signup", "layouts/public-base", loginSignupParams{
 		Variant: "Signup",
 	})
 }
@@ -46,13 +46,12 @@ func (s *emailVerificationPageParams) From(f web.Form) error {
 	return nil
 }
 
-func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) {
+func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) error {
 	var params emailVerificationPageParams
 	if err := web.FromMultipart(r, &params); err != nil {
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
-	s.RenderTemplate(w, http.StatusOK, "public/email-verification", "layouts/public-base", params)
+	return s.RenderTemplate(w, http.StatusOK, "public/email-verification", "layouts/public-base", params)
 }
 
 type signupHandlerParams struct {
@@ -79,24 +78,22 @@ func (s *signupHandlerParams) From(f web.Form) error {
 	return nil
 }
 
-func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 	var params signupHandlerParams
 	err := web.FromMultipart(r, &params)
 	if err != nil {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
 		})
-		return
 	}
 
 	if s.config.Core.RequiredEmailSuffix != "" {
 		if !strings.HasSuffix(params.Email, s.config.Core.RequiredEmailSuffix) {
-			s.AlertError(w, alertErrorParams{
+			return s.AlertError(w, alertErrorParams{
 				Variant: "danger",
 				Message: fmt.Sprintf("Please use your email with the suffix: %s (will be verified).", s.config.Core.RequiredEmailSuffix),
 			})
-			return
 		}
 	}
 
@@ -107,11 +104,10 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	})
 	if err != nil {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
-		return
 	}
 
 	em, err := models.InsertEmail(r.Context(), s.db, models.NewEmail{
@@ -120,23 +116,21 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().Add(emailExpiryHours * time.Hour),
 	})
 	if err != nil {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
-		return
 	}
 
 	if err := s.SendVerificationEmail(usr.Email, "User", em.Token); err != nil {
 		slog.Error("failed sending verification email", "error", err)
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
 		})
-		return
 	}
 
-	web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
+	return web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=name", usr.Email))
 }
 
 type loginHandlerParams struct {
@@ -159,10 +153,10 @@ func (l *loginHandlerParams) From(f web.Form) error {
 	return nil
 }
 
-func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 	var params loginHandlerParams
 	if err := web.FromMultipart(r, &params); err != nil {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: err.Error(),
 		})
@@ -171,31 +165,27 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	usr, err := models.GetUser(r.Context(), s.db, db.FilterEq("email", params.Email))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
-			s.AlertError(w, alertErrorParams{
+			return s.AlertError(w, alertErrorParams{
 				Variant: "danger",
 				Message: "No verified users found with that email and password.",
 			})
-			return
 		}
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	if usr.VerifiedAt == nil {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "No verified users found with that email and password.",
 		})
-		return
 	}
 
 	ok := auth.MustVerifyPassword(params.Password, usr.Password)
 	if !ok {
-		s.AlertError(w, alertErrorParams{
+		return s.AlertError(w, alertErrorParams{
 			Variant: "danger",
 			Message: "No verified users found with that email and password.",
 		})
-		return
 	}
 
 	session := auth.NewSession()
@@ -205,50 +195,43 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		UserId:  usr.Id,
 	})
 	if err != nil {
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	auth.AddSession(w, session)
-
-	web.HxRedirect(w, "/")
+	return web.HxRedirect(w, "/")
 }
 
-func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) error {
 	token := auth.Token(r.PathValue("token"))
 
 	e, err := models.GetEmail(r.Context(), s.db, db.FilterEq("token", token))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
-			s.FullpageError(w, fullPageErrorParams{
+			return s.FullpageError(w, fullPageErrorParams{
 				Code:    http.StatusNotFound,
 				Message: "Token not found.",
 			})
-			return
 		}
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	if time.Now().After(e.Expires) {
 		if errors.Is(err, db.ErrNoRows) {
-			s.FullpageError(w, fullPageErrorParams{
+			return s.FullpageError(w, fullPageErrorParams{
 				Code:    http.StatusNotFound,
 				Message: "Token not found.",
 			})
-			return
 		}
 
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	if err := models.VerifyUser(r.Context(), s.db, db.FilterEq("id", e.UserId)); err != nil {
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	slog.Info("verified user", "id", e.UserId)
 
-	web.Redirect(w, "/login")
+	return web.Redirect(w, "/login")
 }

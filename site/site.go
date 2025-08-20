@@ -16,6 +16,7 @@ import (
 	"uwece.ca/app/email"
 	"uwece.ca/app/middleware"
 	"uwece.ca/app/templates"
+	"uwece.ca/app/web"
 )
 
 //go:embed templates/* static/*
@@ -47,6 +48,7 @@ func New(c *config.Config, db *db.DB) *Site {
 }
 
 func (s *Site) Routes() http.Handler {
+	w := web.NewHandlerWrapper(s)
 	r := chi.NewRouter()
 	r.Use(middleware.LogRecover)
 	r.Use(chimd.Compress(5))
@@ -55,21 +57,21 @@ func (s *Site) Routes() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.LoadUser(s.db))
-		r.Get("/", s.Index)
+		r.Get("/", w.Wrap(s.Index))
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireLogin(false))
-			r.Get("/login", s.LoginPage)
-			r.Post("/login", s.LoginHandler)
+			r.Get("/login", w.Wrap(s.LoginPage))
+			r.Post("/login", w.Wrap(s.LoginHandler))
 
-			r.Get("/signup", s.SignupPage)
-			r.Post("/signup", s.SignupHandler)
+			r.Get("/signup", w.Wrap(s.SignupPage))
+			r.Post("/signup", w.Wrap(s.SignupHandler))
 
-			r.Get("/signup/email-verification", s.EmailVerificationPage)
-			r.Get("/signup/verify/{token}", s.EmailVerificationHandler)
+			r.Get("/signup/email-verification", w.Wrap(s.EmailVerificationPage))
+			r.Get("/signup/verify/{token}", w.Wrap(s.EmailVerificationHandler))
 		})
 
-		r.NotFound(s.NotFound)
+		r.NotFound(w.Wrap(s.NotFound))
 	})
 
 	return r
@@ -90,19 +92,20 @@ func (s *Site) UnhandledError(w http.ResponseWriter, err error) {
 	}
 }
 
-func (s *Site) RenderPlain(w http.ResponseWriter, statusCode int, name string, params any) {
-	s.RenderTemplate(w, statusCode, name, "", params)
+func (s *Site) RenderPlain(w http.ResponseWriter, statusCode int, name string, params any) error {
+	return s.RenderTemplate(w, statusCode, name, "", params)
 }
 
-func (s *Site) RenderTemplate(w http.ResponseWriter, statusCode int, name, base string, params any) {
+func (s *Site) RenderTemplate(w http.ResponseWriter, statusCode int, name, base string, params any) error {
 	err := s.templates.Execute(name, w, base, params)
 	if err != nil {
-		s.UnhandledError(w, err)
-		return
+		return err
 	}
 
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(statusCode)
+
+	return nil
 }
 
 func (s *Site) Static() http.Handler {
@@ -119,12 +122,12 @@ func (s *Site) Static() http.Handler {
 	return http.StripPrefix("/static", http.FileServer(http.FS(sub)))
 }
 
-func (s *Site) Index(w http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", nil)
+func (s *Site) Index(w http.ResponseWriter, r *http.Request) error {
+	return s.RenderTemplate(w, http.StatusOK, "public/home", "layouts/public-base", nil)
 }
 
-func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) {
-	s.FullpageError(w, fullPageErrorParams{
+func (s *Site) NotFound(w http.ResponseWriter, r *http.Request) error {
+	return s.FullpageError(w, fullPageErrorParams{
 		Code:    http.StatusNotFound,
 		Message: "Resource Not Found.",
 	})
@@ -135,8 +138,8 @@ type fullPageErrorParams struct {
 	Message string
 }
 
-func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) {
-	s.RenderTemplate(w, params.Code, "public/error", "layouts/public-base", params)
+func (s *Site) FullpageError(w http.ResponseWriter, params fullPageErrorParams) error {
+	return s.RenderTemplate(w, params.Code, "public/error", "layouts/public-base", params)
 }
 
 type alertErrorParams struct {
@@ -144,6 +147,6 @@ type alertErrorParams struct {
 	Message string
 }
 
-func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) {
-	s.RenderPlain(w, http.StatusOK, "public/alert-error", params)
+func (s *Site) AlertError(w http.ResponseWriter, params alertErrorParams) error {
+	return s.RenderPlain(w, http.StatusOK, "public/alert-error", params)
 }
