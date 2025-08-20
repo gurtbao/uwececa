@@ -194,3 +194,42 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	HxRedirect(w, "/")
 }
+
+func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) {
+	token := auth.Token(r.PathValue("token"))
+
+	e, err := models.GetEmail(r.Context(), s.db, db.FilterEq("token", token))
+	if err != nil {
+		if errors.Is(err, db.ErrNoRows) {
+			s.FullpageError(w, fullPageErrorParams{
+				Code:    http.StatusNotFound,
+				Message: "Token not found.",
+			})
+			return
+		}
+		s.UnhandledError(w, err)
+		return
+	}
+
+	if time.Now().After(e.Expires) {
+		if errors.Is(err, db.ErrNoRows) {
+			s.FullpageError(w, fullPageErrorParams{
+				Code:    http.StatusNotFound,
+				Message: "Token not found.",
+			})
+			return
+		}
+
+		s.UnhandledError(w, err)
+		return
+	}
+
+	if err := models.VerifyUser(r.Context(), s.db, db.FilterEq("id", e.UserId)); err != nil {
+		s.UnhandledError(w, err)
+		return
+	}
+
+	slog.Info("verified user", "id", e.UserId)
+
+	Redirect(w, "/login")
+}
