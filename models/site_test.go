@@ -3,6 +3,7 @@ package models_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"uwece.ca/app/db"
@@ -101,4 +102,21 @@ func TestGetSites(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, site, sites[0])
+}
+
+func TestUpdateSites(t *testing.T) {
+	t.Parallel()
+
+	d := dbtest.GetTestDB(t)
+	require.NoError(t, d.RunMigrations(models.Migrations))
+	id := SeedSite(t, d)
+	now := time.Now()
+
+	err := models.UpdateSites(context.Background(), d, db.Updates(db.Update("verified_at", time.Now())), db.FilterEq("id", id))
+	require.NoError(t, err)
+
+	site, err := models.GetSite(context.Background(), d, db.FilterEq("id", id))
+	require.NoError(t, err)
+
+	require.True(t, now.Before(*site.VerifiedAt))
 }

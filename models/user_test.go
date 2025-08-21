@@ -86,7 +86,7 @@ func TestUserGet(t *testing.T) {
 	require.Equal(t, usr, result)
 }
 
-func TestVerifyUser(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 	t.Parallel()
 	d := dbtest.GetTestDB(t)
 	require.NoError(t, d.RunMigrations(models.Migrations))
@@ -95,7 +95,7 @@ func TestVerifyUser(t *testing.T) {
 
 	start := time.Now()
 
-	err := models.VerifyUser(context.Background(), d, db.FilterEq("id", id))
+	err := models.UpdateUser(context.Background(), d, db.Updates(db.Update("verified_at", time.Now()), db.Update("updated_at", time.Now())), db.FilterEq("id", id))
 	require.NoError(t, err)
 
 	usr, err := models.GetUser(context.Background(), d, db.FilterEq("id", id))

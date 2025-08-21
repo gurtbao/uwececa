@@ -77,3 +77,16 @@ func GetSites(ctx context.Context, d db.Ex, filters ...db.Filter) ([]Site, error
 
 	return site, nil
 }
+
+func UpdateSites(ctx context.Context, d db.Ex, updates []db.UpdateData, filters ...db.Filter) error {
+	keys, values := db.BuildUpdate(updates)
+	where, args := db.BuildWhere(filters)
+
+	values = append(values, args...)
+
+	if _, err := d.ExecContext(ctx, `update sites`+keys+where, values...); err != nil {
+		return db.HandleError(err)
+	}
+
+	return nil
+}

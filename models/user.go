@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"uwece.ca/app/db"
@@ -54,14 +55,16 @@ func GetUser(ctx context.Context, d db.Ex, filters ...db.Filter) (User, error) {
 	return usr, nil
 }
 
-func VerifyUser(ctx context.Context, d db.Ex, filters ...db.Filter) error {
+func UpdateUser(ctx context.Context, d db.Ex, updates []db.UpdateData, filters ...db.Filter) error {
+	if len(filters) == 0 {
+		slog.Debug("calling user update without filters")
+	}
 	where, args := db.BuildWhere(filters)
-	now := time.Now()
+	keys, values := db.BuildUpdate(updates)
 
-	newArgs := []any{now, now}
-	newArgs = append(newArgs, args...)
+	values = append(values, args...)
 
-	if _, err := d.ExecContext(ctx, `update users set verified_at = ?, updated_at = ?`+where, newArgs...); err != nil {
+	if _, err := d.ExecContext(ctx, `update users`+keys+where, values...); err != nil {
 		return db.HandleError(err)
 	}
 

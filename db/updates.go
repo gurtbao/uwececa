@@ -22,6 +22,10 @@ func BuildUpdate(updates []UpdateData) (string, []any) {
 	return clause, values
 }
 
+func Updates(updates ...UpdateData) []UpdateData {
+	return updates
+}
+
 type UpdateData struct {
 	key  string
 	data any

@@ -238,7 +238,7 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	if err := models.VerifyUser(r.Context(), s.db, db.FilterEq("id", e.UserId)); err != nil {
+	if err := models.UpdateUser(r.Context(), s.db, db.Updates(db.Update("updated_at", time.Now()), db.Update("verified_at", time.Now())), db.FilterEq("id", e.UserId)); err != nil {
 		return err
 	}
 
