@@ -242,3 +242,8 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 
 	return web.Redirect(w, "/login")
 }
+
+func (s *Site) Logout(w http.ResponseWriter, r *http.Request) error {
+	auth.DeleteSession(w)
+	return web.Redirect(w, "/")
+}

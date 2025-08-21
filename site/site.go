@@ -60,6 +60,7 @@ func (s *Site) Routes() http.Handler {
 		r.Use(middleware.LoadUser(s.db))
 		r.Get("/", w.Wrap(s.Index))
 
+		// No login group.
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireLogin(false))
 			r.Get("/login", w.Wrap(s.LoginPage))
@@ -70,6 +71,12 @@ func (s *Site) Routes() http.Handler {
 
 			r.Get("/signup/email-verification", w.Wrap(s.EmailVerificationPage))
 			r.Get("/signup/verify/{token}", w.Wrap(s.EmailVerificationHandler))
+		})
+
+		// Required Login Group.
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireLogin(true))
+			r.Get("/logout", w.Wrap(s.Logout))
 		})
 
 		r.NotFound(w.Wrap(s.NotFound))
