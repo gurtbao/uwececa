@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Start mailpit:
+mailpit &
+
 # If .env exists, export the .env variables.
 if [[ -f .env ]]; then
 	export $(cat .env | xargs)
