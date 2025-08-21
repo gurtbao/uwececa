@@ -111,6 +111,9 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		Name:     params.Name,
 	})
 	if err != nil {
+		if !errors.Is(err, db.ErrUnique) {
+			slog.Error("failed inserting user into database during signup", "error", err, "email", params.Email)
+		}
 		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
@@ -123,6 +126,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		Expires: time.Now().Add(emailExpiryHours * time.Hour),
 	})
 	if err != nil {
+		slog.Error("failed inserting email into database during signup", "error", err, "email", params.Email)
 		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
