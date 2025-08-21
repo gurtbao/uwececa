@@ -47,4 +47,25 @@ var Migrations = []db.Migration{
 		`)
 		return err
 	}),
+	db.FuncMigration("0004_add_sites", func(tx db.Ex) error {
+		_, err := tx.Exec(`
+			CREATE TABLE IF NOT EXISTS sites (
+				id integer primary key AUTOINCREMENT,
+
+				user_id integer not null unique references users (id),
+				subdomain varchar(255) not null unique,
+				home_content varchar,
+				navbar varchar,
+				custom_stylesheet varchar,
+
+				verified_at timestamp,
+    			created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    			updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+			);
+
+			create index sites_user_id_idx on sites (user_id);
+			create index sites_subdomain_idx on sites (subdomain);
+		`)
+		return err
+	}),
 }
