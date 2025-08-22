@@ -86,11 +86,10 @@ func RequireLogin(t bool) func(next http.Handler) http.Handler {
 			_, ok := GetUser(r)
 			if !ok == t {
 				if t {
-					w.Header().Set("Location", "/login")
+					redirect(w, "/login")
 				} else {
-					w.Header().Set("Location", "/")
+					redirect(w, "/login")
 				}
-				w.WriteHeader(http.StatusFound)
 				return
 			}
 

@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"uwece.ca/app/db"
-	"uwece.ca/app/middleware"
 	"uwece.ca/app/models"
+	"uwece.ca/app/site/middleware"
 	"uwece.ca/app/web"
 )
 
@@ -73,7 +73,7 @@ func (s *Site) NewBlogHandler(w http.ResponseWriter, r *http.Request) error {
 		if errors.Is(err, db.ErrUnique) {
 			return s.AlertError(w, r, alertErrorParams{
 				Variant: "danger",
-				Message: fmt.Sprintf("The site you selected: %s was not available, try using your last name. You might also already have a site.", params.Subdomain),
+				Message: fmt.Sprintf("The site you selected: %s was not available, try using your last name.", params.Subdomain),
 			})
 		}
 

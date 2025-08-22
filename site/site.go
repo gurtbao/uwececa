@@ -14,8 +14,9 @@ import (
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
 	"uwece.ca/app/email"
-	"uwece.ca/app/middleware"
+	mid "uwece.ca/app/middleware"
 	"uwece.ca/app/models"
+	"uwece.ca/app/site/middleware"
 	"uwece.ca/app/templates"
 	"uwece.ca/app/web"
 )
@@ -51,7 +52,7 @@ func New(c *config.Config, db *db.DB) *Site {
 func (s *Site) Routes() http.Handler {
 	w := web.NewHandlerWrapper(s)
 	r := chi.NewRouter()
-	r.Use(middleware.LogRecover)
+	r.Use(mid.LogRecover)
 	r.Use(chimd.Compress(5))
 
 	r.Handle("/static/*", s.Static())
@@ -79,9 +80,12 @@ func (s *Site) Routes() http.Handler {
 			r.Get("/logout", w.Wrap(s.Logout))
 
 			r.Group(func(r chi.Router) {
-				r.Use(middleware.RequireBlog(s.db, false))
-				r.Get("/new-blog", w.Wrap(s.NewBlogPage))
-				r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
+				r.Use(middleware.LoadBlog(s.db))
+				r.Group(func(r chi.Router) {
+					r.Use(middleware.RequireBlog(false))
+					r.Get("/new-blog", w.Wrap(s.NewBlogPage))
+					r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
+				})
 			})
 		})
 
