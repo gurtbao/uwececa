@@ -29,9 +29,10 @@
 				<a class="btn btn-outline-dark" href="/login">Login</a>
 				{{ else }}
 				<div class="dropdown">
-					<button class="btn dropdown-toggle" href="/account" data-bs-toggle="dropdown">{{ .LoggedInUser.Name
-						}}</button>
+					<button class="btn dropdown-toggle" data-bs-toggle="dropdown">{{ .LoggedInUser.Name }}</button>
+
 					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/site">Your Blog</a></li>
 						<li><a class="dropdown-item" href="/logout">Logout</a></li>
 					</ul>
 				</div>
