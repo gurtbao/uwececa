@@ -85,6 +85,10 @@ func (s *Site) Routes() http.Handler {
 					r.Get("/new-blog", w.Wrap(s.NewBlogPage))
 					r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
 				})
+				r.Group(func(r chi.Router) {
+					r.Use(middleware.RequireBlog(true))
+					r.Get("/site", w.Wrap(s.Index))
+				})
 			})
 		})
 

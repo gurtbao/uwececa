@@ -10,8 +10,8 @@
 			{{ if eq .Data.Variant "Login" }}
 			<form hx-post="/login" hx-target="#error-target" hx-swap="innerHTML">
 				<div class="mb-3">
-					<label for="loginEmail" class="form-label">Email:</label>
-					<input type="email" class="form-control" id="loginEmail" name="email" required
+					<label for="loginEmail" class="form-label">Your Waterloo NetID:</label>
+					<input type="text" class="form-control" id="loginEmail" name="netid" required
 						aria-describedby="login">
 				</div>
 
@@ -29,9 +29,11 @@
 			{{ if eq .Data.Variant "Signup" }}
 			<form hx-post="/signup" hx-target="#error-target" , hx-swap="innerHTML">
 				<div class="mb-3">
-					<label for="signupEmail" class="form-label">Waterloo Email:</label>
-					<input type="email" class="form-control" id="signupEmail" name="email" required
+					<label for="signupNetID" class="form-label">Waterloo NetID:</label>
+					<input type="text" class="form-control" id="signupEmail" name="netid" required
 						aria-describedby="login">
+
+					<div id="netIDHelp" class="form-text">Will be verified over email.</div>
 				</div>
 
 				<div class="mb-3">

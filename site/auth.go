@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/mail"
 	"strings"
 	"time"
 
@@ -35,18 +34,30 @@ func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) error {
 }
 
 type signupHandlerParams struct {
-	Email    string
+	NetID    string
 	Password string
 	Name     string
 }
 
 func (s *signupHandlerParams) From(f web.Form) error {
-	s.Email = f.Value("email")
+	s.NetID = strings.ToLower(f.Value("netid"))
 	s.Password = f.Value("password")
 	s.Name = f.Value("name")
 
-	if _, err := mail.ParseAddress(s.Email); err != nil {
-		return errors.New("Please provide a valid email.")
+	if 1 > len(s.NetID) && len(s.NetID) > 35 {
+		return errors.New("Please provide a valid netID (0 < len < 35).")
+	}
+
+	nID := strings.Map(func(r rune) rune {
+		if r < '0' || 'z' < r {
+			return -1
+		}
+
+		return r
+	}, s.NetID)
+
+	if nID != s.NetID {
+		return errors.New("Please provide us a valid netID (1-9,a-z).")
 	}
 
 	if s.Name == "" {
@@ -79,25 +90,16 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	if s.config.Core.RequiredEmailSuffix != "" {
-		if !strings.HasSuffix(params.Email, s.config.Core.RequiredEmailSuffix) {
-			return s.AlertError(w, r, alertErrorParams{
-				Variant: "danger",
-				Message: fmt.Sprintf("Please use your email with the suffix: %s (will be verified).", s.config.Core.RequiredEmailSuffix),
-			})
-		}
-	}
-
 	password := auth.HashPassword(params.Password)
 
 	usr, err := models.InsertUser(r.Context(), s.db, models.NewUser{
-		Email:    params.Email,
+		Email:    fmt.Sprintf("%s@%s", params.NetID, s.config.Core.EmailDomain),
 		Password: password,
 		Name:     params.Name,
 	})
 	if err != nil {
 		if !errors.Is(err, db.ErrUnique) {
-			slog.Error("failed inserting user into database during signup", "error", err, "email", params.Email)
+			slog.Error("failed inserting user into database during signup", "error", err, "net_id", params.NetID)
 		}
 		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
@@ -111,7 +113,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		Expires: time.Now().Add(emailExpiryHours * time.Hour),
 	})
 	if err != nil {
-		slog.Error("failed inserting email into database during signup", "error", err, "email", params.Email)
+		slog.Error("failed inserting email into database during signup", "error", err, "net_id", params.NetID)
 		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
 			Message: "Something went wrong, please try again.",
@@ -133,15 +135,15 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 }
 
 type loginHandlerParams struct {
-	Email    string
+	NetID    string
 	Password string
 }
 
 func (l *loginHandlerParams) From(f web.Form) error {
-	l.Email = f.Value("email")
+	l.NetID = f.Value("netid")
 	l.Password = f.Value("password")
 
-	if l.Email == "" {
+	if l.NetID == "" {
 		return errors.New("Please provide a valid email.")
 	}
 
@@ -161,7 +163,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	usr, err := models.GetUser(r.Context(), s.db, db.FilterEq("email", params.Email))
+	usr, err := models.GetUser(r.Context(), s.db, db.FilterEq("email", fmt.Sprintf("%s@%s", params.NetID, s.config.Core.EmailDomain)))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
 			return s.AlertError(w, r, alertErrorParams{

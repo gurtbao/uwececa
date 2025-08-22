@@ -13,10 +13,10 @@ type Config struct {
 }
 
 type Core struct {
-	Development         bool   `env:"DEVELOPMENT,default=false"`
-	Addr                string `env:"ADDR,default=localhost:3000"`
-	BaseDomain          string `env:"DOMAIN,default=localhost:3000"`
-	RequiredEmailSuffix string `env:"REQUIRED_EMAIL_SUFFIX,default=@uwaterloo.ca"`
+	Development bool   `env:"DEVELOPMENT,default=false"`
+	Addr        string `env:"ADDR,default=localhost:3000"`
+	BaseDomain  string `env:"DOMAIN,default=localhost:3000"`
+	EmailDomain string `env:"EMAIL_DOMAIN,default=connect.uwaterloo.ca"`
 }
 
 type DB struct {

@@ -3,7 +3,6 @@ package site
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -36,8 +35,7 @@ func (n *newBlogHandlerParams) From(f web.Form) error {
 	name = strings.ToLower(name)
 	nameLen := len(name)
 	name = strings.Map(func(r rune) rune {
-		if r <= 'a' || r >= 'z' {
-			slog.Debug("rejecting", "e", string(r))
+		if r < 'a' || r > 'z' {
 			return -1
 		}
 
