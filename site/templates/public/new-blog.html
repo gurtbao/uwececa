@@ -9,7 +9,8 @@
 		<form hx-post="/new-blog" hx-target="#error-target" , hx-swap="innerHTML">
 			<div class="mb-3">
 				<label for="name" class="form-label">Name:</label>
-				<input type="text" class="form-control" id="name" name="name" required aria-describedby="name">
+				<input type="text" class="form-control" id="name" name="name" required aria-describedby="name"
+					value="{{ .Data.Name }}">
 				<div id="nameHelp" class="form-text">Your preferred name for {name}.{year}.uwece.ca.</div>
 			</div>
 

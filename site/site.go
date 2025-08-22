@@ -70,7 +70,6 @@ func (s *Site) Routes() http.Handler {
 			r.Get("/signup", w.Wrap(s.SignupPage))
 			r.Post("/signup", w.Wrap(s.SignupHandler))
 
-			r.Get("/signup/email-verification", w.Wrap(s.EmailVerificationPage))
 			r.Get("/signup/verify/{token}", w.Wrap(s.EmailVerificationHandler))
 		})
 

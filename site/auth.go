@@ -34,26 +34,6 @@ func (s *Site) SignupPage(w http.ResponseWriter, r *http.Request) error {
 	})
 }
 
-type emailVerificationPageParams struct {
-	Email string
-	Name  string
-}
-
-func (s *emailVerificationPageParams) From(f web.Form) error {
-	s.Email = f.Value("email")
-	s.Name = f.Value("name")
-
-	return nil
-}
-
-func (s *Site) EmailVerificationPage(w http.ResponseWriter, r *http.Request) error {
-	var params emailVerificationPageParams
-	if err := web.FromMultipart(r, &params); err != nil {
-		return err
-	}
-	return s.RenderTemplate(w, r, http.StatusOK, "public/email-verification", "layouts/public-base", params)
-}
-
 type signupHandlerParams struct {
 	Email    string
 	Password string
@@ -82,6 +62,11 @@ func (s *signupHandlerParams) From(f web.Form) error {
 	}
 
 	return nil
+}
+
+type signupResponseParams struct {
+	Email string
+	Name  string
 }
 
 func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
@@ -141,7 +126,10 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	return web.HxLocation(w, fmt.Sprintf("/signup/email-verification?email=%s&name=%s", usr.Email, usr.Name))
+	return s.RenderPlain(w, r, http.StatusOK, "public/signup-response", signupResponseParams{
+		Email: usr.Email,
+		Name:  usr.Name,
+	})
 }
 
 type loginHandlerParams struct {
@@ -210,7 +198,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	auth.AddSession(w, session)
-	return web.HxRedirect(w, "/")
+	return web.HxRedirect(w, "/site")
 }
 
 func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) error {

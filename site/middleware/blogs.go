@@ -64,9 +64,9 @@ func RequireBlog(t bool) func(http.Handler) http.Handler {
 			_, ok := GetBlog(r)
 			if !ok == t {
 				if t {
-					redirect(w, "/site")
-				} else {
 					redirect(w, "/new-blog")
+				} else {
+					redirect(w, "/site")
 				}
 
 				return

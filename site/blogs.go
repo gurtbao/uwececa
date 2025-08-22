@@ -14,8 +14,15 @@ import (
 	"uwece.ca/app/web"
 )
 
+type newBlogPageParams struct {
+	Name string
+}
+
 func (s *Site) NewBlogPage(w http.ResponseWriter, r *http.Request) error {
-	return s.RenderTemplate(w, r, http.StatusOK, "public/new-blog", "layouts/public-base", nil)
+	usr, _ := middleware.GetUser(r)
+	return s.RenderTemplate(w, r, http.StatusOK, "public/new-blog", "layouts/public-base", newBlogPageParams{
+		Name: usr.Name,
+	})
 }
 
 type newBlogHandlerParams struct {

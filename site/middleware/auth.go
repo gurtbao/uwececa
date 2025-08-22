@@ -88,7 +88,7 @@ func RequireLogin(t bool) func(next http.Handler) http.Handler {
 				if t {
 					redirect(w, "/login")
 				} else {
-					redirect(w, "/login")
+					redirect(w, "/site")
 				}
 				return
 			}
