@@ -14,16 +14,6 @@ import (
 )
 
 func (s *Site) NewBlogPage(w http.ResponseWriter, r *http.Request) error {
-	usr, _ := middleware.GetUser(r)
-
-	_, err := models.GetSite(r.Context(), s.db, db.FilterEq("user_id", usr.Id))
-	if !errors.Is(err, db.ErrNoRows) {
-		return web.Redirect(w, "/site")
-	}
-	if err != nil && !errors.Is(err, db.ErrNoRows) {
-		return err
-	}
-
 	return s.RenderTemplate(w, r, http.StatusOK, "public/new-blog", "layouts/public-base", nil)
 }
 
@@ -63,14 +53,6 @@ func (n *newBlogHandlerParams) From(f web.Form) error {
 func (s *Site) NewBlogHandler(w http.ResponseWriter, r *http.Request) error {
 	usr, _ := middleware.GetUser(r)
 
-	_, err := models.GetSite(r.Context(), s.db, db.FilterEq("user_id", usr.Id))
-	if !errors.Is(err, db.ErrNoRows) {
-		return web.HxLocation(w, "/site")
-	}
-	if err != nil && !errors.Is(err, db.ErrNoRows) {
-		return err
-	}
-
 	var params newBlogHandlerParams
 	if err := web.FromMultipart(r, &params); err != nil {
 		return s.AlertError(w, r, alertErrorParams{
@@ -79,7 +61,7 @@ func (s *Site) NewBlogHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	_, err = models.InsertSite(r.Context(), s.db, models.NewSite{
+	_, err := models.InsertSite(r.Context(), s.db, models.NewSite{
 		UserId:      usr.Id,
 		Subdomain:   params.Subdomain,
 		Navbar:      "[Home](/)",

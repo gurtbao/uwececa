@@ -77,8 +77,12 @@ func (s *Site) Routes() http.Handler {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireLogin(true))
 			r.Get("/logout", w.Wrap(s.Logout))
-			r.Get("/new-blog", w.Wrap(s.NewBlogPage))
-			r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.RequireBlog(s.db, false))
+				r.Get("/new-blog", w.Wrap(s.NewBlogPage))
+				r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
+			})
 		})
 
 		r.NotFound(w.Wrap(s.NotFound))
