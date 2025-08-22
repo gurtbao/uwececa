@@ -3,6 +3,7 @@ package site
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -27,16 +28,17 @@ func (n *newBlogHandlerParams) From(f web.Form) error {
 
 	name = strings.ToLower(name)
 	nameLen := len(name)
-	if nameLen == 0 || nameLen >= 35 {
-		return fmt.Errorf("Please submit a valid name (0 < len < 35).")
-	}
 	name = strings.Map(func(r rune) rune {
-		if r >= 'a' || r <= 'z' {
+		if r <= 'a' || r >= 'z' {
+			slog.Debug("rejecting", "e", string(r))
 			return -1
 		}
 
 		return r
 	}, name)
+	if nameLen == 0 || nameLen >= 35 {
+		return fmt.Errorf("Please submit a valid name (0 < len < 35).")
+	}
 
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
@@ -71,12 +73,12 @@ func (s *Site) NewBlogHandler(w http.ResponseWriter, r *http.Request) error {
 		if errors.Is(err, db.ErrUnique) {
 			return s.AlertError(w, r, alertErrorParams{
 				Variant: "danger",
-				Message: fmt.Sprintf("The site you selected: %s was not available, try using your last name.", params.Subdomain),
+				Message: fmt.Sprintf("The site you selected: %s was not available, try using your last name. You might also already have a site.", params.Subdomain),
 			})
 		}
 
 		return err
 	}
 
-	return web.HxLocation(w, "/")
+	return s.RenderPlain(w, r, http.StatusOK, "public/new-blog-response", nil)
 }
