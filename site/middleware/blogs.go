@@ -17,10 +17,11 @@ func redirect(w http.ResponseWriter, target string) {
 
 var blogContextKey = struct{ K int }{1}
 
-func loadBlog(d *db.DB, r *http.Request) (int, error) {
+func loadBlog(d *db.DB, r *http.Request) (BlogContext, error) {
+	var ctx BlogContext
 	usr, ok := GetUser(r)
 	if !ok {
-		return 0, errors.New("Load blog requires a user in the request ctx.")
+		return ctx, errors.New("Load blog requires a user in the request ctx.")
 	}
 
 	site, err := models.GetSite(r.Context(), d, db.FilterEq("user_id", usr.Id))
@@ -29,27 +30,37 @@ func loadBlog(d *db.DB, r *http.Request) (int, error) {
 			panic(fmt.Sprintf("db error: %v", err))
 		}
 
-		return 0, err
+		return ctx, err
 	}
 
-	return site.Id, nil
+	ctx = BlogContext{
+		Id:       site.Id,
+		Verified: site.VerifiedAt != nil,
+	}
+
+	return ctx, nil
 }
 
-func GetBlog(r *http.Request) (int, bool) {
+func GetBlog(r *http.Request) (BlogContext, bool) {
 	u := r.Context().Value(blogContextKey)
-	s, ok := u.(int)
+	s, ok := u.(BlogContext)
 	return s, ok
+}
+
+type BlogContext struct {
+	Id       int
+	Verified bool
 }
 
 func LoadBlog(db *db.DB) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			blogID, err := loadBlog(db, r)
+			c, err := loadBlog(db, r)
 			if err != nil {
 				h.ServeHTTP(w, r)
 			}
 
-			ctx := context.WithValue(r.Context(), blogContextKey, blogID)
+			ctx := context.WithValue(r.Context(), blogContextKey, c)
 
 			r = r.WithContext(ctx)
 
@@ -62,13 +73,35 @@ func RequireBlog(t bool) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			_, ok := GetBlog(r)
-			if !ok == t {
+			if t != ok {
 				if t {
 					redirect(w, "/new-blog")
 				} else {
 					redirect(w, "/site")
 				}
 
+				return
+			}
+
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func RequireBlogVerified(t bool) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, ok := GetBlog(r)
+			if !ok {
+				panic("RequireBlogVerified requires a blog in ctx.")
+			}
+
+			if b.Verified != t {
+				if t {
+					redirect(w, "/site/blog-unverified")
+				} else {
+					redirect(w, "/site")
+				}
 				return
 			}
 

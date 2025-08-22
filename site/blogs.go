@@ -87,3 +87,7 @@ func (s *Site) NewBlogHandler(w http.ResponseWriter, r *http.Request) error {
 
 	return s.RenderPlain(w, r, http.StatusOK, "public/new-blog-response", nil)
 }
+
+func (s *Site) BlogUnverified(w http.ResponseWriter, r *http.Request) error {
+	return s.RenderTemplate(w, r, http.StatusOK, "public/blog-unverified", "layouts/public-base", nil)
+}

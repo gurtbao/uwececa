@@ -86,7 +86,12 @@ func (s *Site) Routes() http.Handler {
 					r.Post("/new-blog", w.Wrap(s.NewBlogHandler))
 				})
 				r.Group(func(r chi.Router) {
+					r.Use(middleware.RequireBlog(true), middleware.RequireBlogVerified(false))
+					r.Get("/site/blog-unverified", w.Wrap(s.BlogUnverified))
+				})
+				r.Group(func(r chi.Router) {
 					r.Use(middleware.RequireBlog(true))
+					r.Use(middleware.RequireBlogVerified(true))
 					r.Get("/site", w.Wrap(s.Index))
 				})
 			})
