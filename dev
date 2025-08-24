@@ -11,4 +11,6 @@ fi
 # Devmode things.
 export SLOG_DEBUG=1 UWECECA_DEVELOPMENT=1
 
-go run cmd/uwececa/main.go
+go run cmd/uwececa/main.go &
+
+wait
