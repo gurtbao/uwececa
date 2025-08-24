@@ -1,4 +1,4 @@
-package email
+package utils
 
 import (
 	"gopkg.in/gomail.v2"
@@ -20,7 +20,7 @@ func NewMailer(cfg *config.Config) *Mailer {
 	}
 }
 
-type Message struct {
+type Email struct {
 	To       string
 	Name     string
 	Subject  string
@@ -28,7 +28,7 @@ type Message struct {
 	HtmlBody string
 }
 
-func (m *Mailer) SendMessage(me Message) error {
+func (m *Mailer) SendMessage(me Email) error {
 	message := gomail.NewMessage()
 
 	message.SetAddressHeader("From", m.cfg.Mailer.FromAddress, "UWECECA Team")

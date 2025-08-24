@@ -14,8 +14,8 @@ import (
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
-	"uwece.ca/app/shutdown"
 	"uwece.ca/app/site"
+	"uwece.ca/app/utils/shutdown"
 )
 
 func main() {

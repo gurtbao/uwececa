@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"time"
 
-	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
+	"uwece.ca/app/web"
 )
 
 var userContextKey = struct{ I int }{I: 1}
 
 func loadUser(d *db.DB, w http.ResponseWriter, r *http.Request) (models.User, error) {
-	session, ok := auth.GetSession(r)
+	session, ok := web.GetSession(r)
 	if !ok {
 		return models.User{}, errors.New("failed to get session (session not found)")
 	}
@@ -25,12 +25,12 @@ func loadUser(d *db.DB, w http.ResponseWriter, r *http.Request) (models.User, er
 		if !errors.Is(err, db.ErrNoRows) {
 			panic(fmt.Sprintf("db error: %v", err))
 		}
-		auth.DeleteSession(w)
+		web.DeleteSession(w)
 		return models.User{}, err
 	}
 
 	if time.Now().After(dbs.Expires) {
-		auth.DeleteSession(w)
+		web.DeleteSession(w)
 		return models.User{}, err
 	}
 
@@ -39,7 +39,7 @@ func loadUser(d *db.DB, w http.ResponseWriter, r *http.Request) (models.User, er
 		if !errors.Is(err, db.ErrNoRows) {
 			panic(fmt.Sprintf("db error: %v", err))
 		}
-		auth.DeleteSession(w)
+		web.DeleteSession(w)
 		return models.User{}, err
 	}
 
@@ -63,7 +63,7 @@ func GetUserRef(r *http.Request) *models.User {
 	return &usr
 }
 
-func LoadUser(d *db.DB) func(next http.Handler) http.Handler {
+func LoadUser(d *db.DB) web.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			usr, err := loadUser(d, w, r)
@@ -80,15 +80,15 @@ func LoadUser(d *db.DB) func(next http.Handler) http.Handler {
 	}
 }
 
-func RequireLogin(t bool) func(next http.Handler) http.Handler {
+func RequireLogin(t bool) web.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			_, ok := GetUser(r)
 			if !ok == t {
 				if t {
-					redirect(w, "/login")
+					web.Redirect(w, "/login")
 				} else {
-					redirect(w, "/site")
+					web.Redirect(w, "/site")
 				}
 				return
 			}

@@ -1,10 +1,10 @@
-package auth_test
+package utils_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"uwece.ca/app/auth"
+	"uwece.ca/app/utils"
 )
 
 func TestPasswordHashing(t *testing.T) {
@@ -12,7 +12,7 @@ func TestPasswordHashing(t *testing.T) {
 
 	password := "hello_123453124"
 
-	hash := auth.HashPassword(password)
+	hash := utils.HashPassword(password)
 
-	require.True(t, auth.MustVerifyPassword(password, hash))
+	require.True(t, utils.MustVerifyPassword(password, hash))
 }

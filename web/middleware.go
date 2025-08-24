@@ -1,4 +1,4 @@
-package middleware
+package web
 
 import (
 	"log/slog"
@@ -8,9 +8,9 @@ import (
 	chimid "github.com/go-chi/chi/v5/middleware"
 )
 
-type fn func(http.Handler) http.Handler
+type Middleware func(http.Handler) http.Handler
 
-func LogRecover(next http.Handler) http.Handler {
+func MidLogRecover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now().UTC()
 		ww := chimid.NewWrapResponseWriter(w, r.ProtoMajor)

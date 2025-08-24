@@ -13,11 +13,10 @@ import (
 
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
-	"uwece.ca/app/email"
-	mid "uwece.ca/app/middleware"
 	"uwece.ca/app/models"
 	"uwece.ca/app/site/middleware"
 	"uwece.ca/app/templates"
+	"uwece.ca/app/utils"
 	"uwece.ca/app/web"
 )
 
@@ -29,7 +28,7 @@ type Site struct {
 	db        *db.DB
 	templates *templates.Templates
 	embedFS   embed.FS
-	mailer    *email.Mailer
+	mailer    *utils.Mailer
 }
 
 func New(c *config.Config, db *db.DB) *Site {
@@ -45,14 +44,14 @@ func New(c *config.Config, db *db.DB) *Site {
 		db:        db,
 		templates: tmpl,
 		embedFS:   embedFS,
-		mailer:    email.NewMailer(c),
+		mailer:    utils.NewMailer(c),
 	}
 }
 
 func (s *Site) Routes() http.Handler {
 	w := web.NewHandlerWrapper(s)
 	r := chi.NewRouter()
-	r.Use(mid.LogRecover)
+	r.Use(web.MidLogRecover)
 	r.Use(chimd.Compress(5))
 
 	r.Handle("/static/*", s.Static())

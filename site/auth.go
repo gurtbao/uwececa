@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
 	"uwece.ca/app/models"
+	"uwece.ca/app/utils"
 	"uwece.ca/app/web"
 )
 
@@ -90,7 +90,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	password := auth.HashPassword(params.Password)
+	password := utils.HashPassword(params.Password)
 
 	usr, err := models.InsertUser(r.Context(), s.db, models.NewUser{
 		Email:    fmt.Sprintf("%s@%s", params.NetID, s.config.Core.EmailDomain),
@@ -108,7 +108,7 @@ func (s *Site) SignupHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	em, err := models.InsertEmail(r.Context(), s.db, models.NewEmail{
-		Token:   auth.NewToken(),
+		Token:   utils.NewToken(),
 		UserId:  usr.Id,
 		Expires: time.Now().Add(emailExpiryHours * time.Hour),
 	})
@@ -181,7 +181,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	ok := auth.MustVerifyPassword(params.Password, usr.Password)
+	ok := utils.MustVerifyPassword(params.Password, usr.Password)
 	if !ok {
 		return s.AlertError(w, r, alertErrorParams{
 			Variant: "danger",
@@ -189,7 +189,7 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	session := auth.NewSession()
+	session := web.NewSession()
 	_, err = models.InsertSession(r.Context(), s.db, models.NewSession{
 		Token:   session.Token,
 		Expires: session.Expiry,
@@ -199,12 +199,12 @@ func (s *Site) LoginHandler(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	auth.AddSession(w, session)
+	web.AddSession(w, session)
 	return web.HxRedirect(w, "/site")
 }
 
 func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) error {
-	token := auth.Token(r.PathValue("token"))
+	token := utils.Token(r.PathValue("token"))
 
 	e, err := models.GetEmail(r.Context(), s.db, db.FilterEq("token", token))
 	if err != nil {
@@ -238,6 +238,6 @@ func (s *Site) EmailVerificationHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *Site) Logout(w http.ResponseWriter, r *http.Request) error {
-	auth.DeleteSession(w)
+	web.DeleteSession(w)
 	return web.Redirect(w, "/")
 }

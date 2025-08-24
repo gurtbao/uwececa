@@ -5,20 +5,20 @@ import (
 	"errors"
 	"time"
 
-	"uwece.ca/app/auth"
 	"uwece.ca/app/db"
+	"uwece.ca/app/utils"
 )
 
 type Email struct {
-	Id      int        `db:"id"`
-	UserId  int        `db:"user_id"`
-	Token   auth.Token `db:"token"`
-	Expires time.Time  `db:"expires"`
+	Id      int         `db:"id"`
+	UserId  int         `db:"user_id"`
+	Token   utils.Token `db:"token"`
+	Expires time.Time   `db:"expires"`
 }
 
 type NewEmail struct {
 	UserId  int
-	Token   auth.Token
+	Token   utils.Token
 	Expires time.Time
 }
 

@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"html/template"
 
-	"uwece.ca/app/auth"
-	"uwece.ca/app/email"
+	"uwece.ca/app/utils"
 )
 
-func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error {
+func (s *Site) SendVerificationEmail(addr, name string, token utils.Token) error {
 	params := struct {
 		Name   string
 		Link   template.HTML
@@ -33,7 +32,7 @@ func (s *Site) SendVerificationEmail(addr, name string, token auth.Token) error 
 		return fmt.Errorf("error rendering email html template: %w", err)
 	}
 
-	err = s.mailer.SendMessage(email.Message{
+	err = s.mailer.SendMessage(utils.Email{
 		To:       addr,
 		Name:     name,
 		Subject:  "UWECECA - Verification",

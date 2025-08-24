@@ -1,8 +1,10 @@
-package auth
+package web
 
 import (
 	"net/http"
 	"time"
+
+	"uwece.ca/app/utils"
 )
 
 const (
@@ -11,14 +13,14 @@ const (
 )
 
 type Session struct {
-	Token  Token
+	Token  utils.Token
 	Expiry time.Time
 }
 
 // Create a new session token (a hex encoded string of len tokenBytes).
 func NewSession() Session {
 	return Session{
-		Token:  NewToken(),
+		Token:  utils.NewToken(),
 		Expiry: time.Now().Add(expiryHours * time.Hour),
 	}
 }
@@ -46,7 +48,7 @@ func GetSession(r *http.Request) (Session, bool) {
 	}
 
 	s := Session{
-		Token:  Token(cookie.Value),
+		Token:  utils.Token(cookie.Value),
 		Expiry: cookie.Expires,
 	}
 
