@@ -13,7 +13,7 @@ import (
 func SeedUser(t *testing.T, d db.Ex) int {
 	t.Helper()
 
-	usr, err := models.InsertUser(context.Background(), d, models.NewUser{Email: "hi", Password: "hi"})
+	usr, err := models.InsertUser(context.Background(), d, models.NewUser{NetID: "hi", Password: "hi"})
 	require.NoError(t, err)
 
 	return usr.Id

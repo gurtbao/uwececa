@@ -9,29 +9,40 @@ import (
 
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
+	"uwece.ca/app/mailer"
 	"uwece.ca/app/models"
 	"uwece.ca/app/utils"
 	"uwece.ca/app/web"
 )
 
 var (
-	ErrValidationFailed  = errors.New("validation failed")
-	ErrUserExists        = errors.New("user already exists")
-	ErrUserDoesNotExist  = errors.New("user does not exist")
-	ErrUserNotVerified   = errors.New("user not verified")
-	ErrUserWrongPassword = errors.New("wrong password for user")
-	ErrTokenNotFound     = errors.New("verification token not found")
-	ErrTokenExpired      = errors.New("verification token expired")
+	ErrValidationFailed    = errors.New("Validation Failed")
+	ErrUserExists          = errors.New("user already exists")
+	ErrUserDoesNotExist    = errors.New("user does not exist")
+	ErrUserNotVerified     = errors.New("user not verified")
+	ErrUserWrongPassword   = errors.New("wrong password for user")
+	ErrTokenNotFound       = errors.New("verification token not found")
+	ErrTokenExpired        = errors.New("verification token expired")
+	ErrSessionExpired      = errors.New("user session expired")
+	ErrSessionDoesNotExist = errors.New("user session does not exist")
 )
 
 type UserService struct {
 	db     *db.DB
-	mailer *utils.Mailer
+	mailer mailer.Mailer
 	config *config.Config
 }
 
+func NewUserService(db *db.DB, mailer mailer.Mailer, config *config.Config) *UserService {
+	return &UserService{
+		db:     db,
+		mailer: mailer,
+		config: config,
+	}
+}
+
 func (s UserService) GetEmail(netID string) string {
-	return fmt.Sprintf("%s@%s", netID, s.config.Core.BaseDomain)
+	return fmt.Sprintf("%s@%s", netID, s.config.Core.EmailDomain)
 }
 
 type UserSignupRequest struct {
@@ -86,7 +97,7 @@ func (s *UserService) Signup(ctx context.Context, req UserSignupRequest) (UserSi
 	hashedPassword := utils.HashPassword(req.Password)
 
 	usr, err := models.InsertUser(ctx, s.db, models.NewUser{
-		Email:    s.GetEmail(req.NetID),
+		NetID:    req.NetID,
 		Password: hashedPassword,
 		Name:     req.Name,
 	})
@@ -98,7 +109,7 @@ func (s *UserService) Signup(ctx context.Context, req UserSignupRequest) (UserSi
 		return UserSignupResponse{}, fmt.Errorf("failed to create user: %s", err)
 	}
 
-	_, err = models.InsertEmail(ctx, s.db, models.NewEmail{
+	e, err := models.InsertEmail(ctx, s.db, models.NewEmail{
 		Token:   utils.NewToken(),
 		UserId:  usr.Id,
 		Expires: time.Now().Add(48 * time.Hour),
@@ -107,8 +118,12 @@ func (s *UserService) Signup(ctx context.Context, req UserSignupRequest) (UserSi
 		return UserSignupResponse{}, fmt.Errorf("error creating verification email in database: %w", err)
 	}
 
+	if err := s.mailer.SendVerificationEmail(s.GetEmail(usr.NetID), usr.Name, e.Token); err != nil {
+		return UserSignupResponse{}, fmt.Errorf("error sending verification email: %w", err)
+	}
+
 	return UserSignupResponse{
-		Email: usr.Email,
+		Email: s.GetEmail(usr.NetID),
 		Name:  usr.Name,
 	}, nil
 }
@@ -139,7 +154,7 @@ func (s *UserService) Login(ctx context.Context, req UserLoginRequest) (UserLogi
 		return UserLoginResponse{}, fmt.Errorf("%w, %v", ErrValidationFailed, err)
 	}
 
-	usr, err := models.GetUser(ctx, s.db, db.FilterEq("email", s.GetEmail(req.NetID)))
+	usr, err := models.GetUser(ctx, s.db, db.FilterEq("net_id", req.NetID))
 	if err != nil {
 		if errors.Is(err, db.ErrNoRows) {
 			return UserLoginResponse{}, ErrUserDoesNotExist
@@ -197,4 +212,29 @@ func (s *UserService) Verify(ctx context.Context, token utils.Token) error {
 	}
 
 	return nil
+}
+
+func (s *UserService) LoadSession(ctx context.Context, token utils.Token) (models.User, error) {
+	dbs, err := models.GetSession(ctx, s.db, db.FilterEq("token", token))
+	if err != nil {
+		if errors.Is(err, db.ErrNoRows) {
+			return models.User{}, ErrSessionDoesNotExist
+		}
+
+		return models.User{}, fmt.Errorf("error loading session from database: %w", err)
+	}
+
+	if time.Now().After(dbs.Expires) {
+		return models.User{}, ErrSessionExpired
+	}
+
+	usr, err := models.GetUser(ctx, s.db, db.FilterEq("id", dbs.UserId))
+	if err != nil {
+		if errors.Is(err, db.ErrNoRows) {
+			return models.User{}, ErrUserDoesNotExist
+		}
+		return models.User{}, fmt.Errorf("failed to fetch user while loading session: %w", err)
+	}
+
+	return usr, nil
 }

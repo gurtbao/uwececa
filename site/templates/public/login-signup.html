@@ -1,23 +1,23 @@
-{{ define "title" }}{{ .Data.Variant}}{{ end }}
+{{ define "title" }}{{ .variant }}{{ end }}
 
 {{ define "content" }}
 <div id="inner" class="flex flex-column align-items-center flex-grow-1 justify-content-center m-0 mx-sm-4">
 	<div class="mx-auto mt-5 col-sm-12 col-md-6">
-		<h2 class=" fs-3 mb-3">{{ .Data.Variant }}:</h2>
+		<h2 class=" fs-3 mb-3">{{ .variant }}:</h2>
 		<div id="error-target">
 		</div>
 		<div>
-			{{ if eq .Data.Variant "Login" }}
+			{{ if eq .variant "Login" }}
 			<form hx-post="/login" hx-target="#error-target" hx-swap="innerHTML">
 				<div class="mb-3">
 					<label for="loginEmail" class="form-label">Your Waterloo NetID:</label>
-					<input type="text" class="form-control" id="loginEmail" name="netid" required
+					<input type="text" class="form-control" id="loginEmail" name="NetID" required
 						aria-describedby="login">
 				</div>
 
 				<div class="mb-3">
 					<label for="loginPassword" class="form-label">Password:</label>
-					<input type="password" class="form-control" id="loginPassword" name="password" required
+					<input type="password" class="form-control" id="loginPassword" name="Password" required
 						aria-describedby="login">
 				</div>
 
@@ -26,11 +26,11 @@
 				<p class="text-center mt-3">Don't Have an Account? <a href="/signup">Sign Up Instead</a></p>
 			</form>
 			{{ end }}
-			{{ if eq .Data.Variant "Signup" }}
+			{{ if eq .variant "Signup" }}
 			<form hx-post="/signup" hx-target="#error-target" , hx-swap="innerHTML">
 				<div class="mb-3">
 					<label for="signupNetID" class="form-label">Waterloo NetID:</label>
-					<input type="text" class="form-control" id="signupEmail" name="netid" required
+					<input type="text" class="form-control" id="signupEmail" name="NetID" required
 						aria-describedby="login">
 
 					<div id="netIDHelp" class="form-text">Will be verified over email.</div>
@@ -38,19 +38,19 @@
 
 				<div class="mb-3">
 					<label for="signupEmail" class="form-label">First Name (For communications):</label>
-					<input type="text" class="form-control" id="signupName" name="name" required
+					<input type="text" class="form-control" id="signupName" name="Name" required
 						aria-describedby="login">
 				</div>
 
 				<div class="mb-3">
 					<label for="signupPassword" class="form-label">Password:</label>
-					<input type="password" class="form-control" id="signupPassword" name="password" required
+					<input type="password" class="form-control" id="signupPassword" name="Password" required
 						aria-describedby="login">
 				</div>
 
 				<div class="mb-3">
 					<label for="signupPasswordConfirm" class="form-label">Confirm Password:</label>
-					<input type="password" class="form-control" id="signupPasswordConfirm" name="password-confirm"
+					<input type="password" class="form-control" id="signupPasswordConfirm" name="PasswordConfirm"
 						required aria-describedby="login">
 				</div>
 

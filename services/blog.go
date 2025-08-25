@@ -10,10 +10,19 @@ import (
 	"uwece.ca/app/models"
 )
 
-var ErrSubdomainNotAvailable = errors.New("subdomain not available")
+var (
+	ErrSubdomainNotAvailable = errors.New("subdomain not available")
+	ErrBlogDoesNotExist      = errors.New("blog does not exist")
+)
 
 type BlogService struct {
 	db *db.DB
+}
+
+func NewBlogService(db *db.DB) *BlogService {
+	return &BlogService{
+		db: db,
+	}
 }
 
 type BlogNewRequest struct {
@@ -66,4 +75,17 @@ func (s *BlogService) New(ctx context.Context, req BlogNewRequest, usrID int) er
 	}
 
 	return nil
+}
+
+func (s *BlogService) LoadBlogFromUser(ctx context.Context, usrID int) (models.Site, error) {
+	site, err := models.GetSite(ctx, s.db, db.FilterEq("user_id", usrID))
+	if err != nil {
+		if errors.Is(err, db.ErrNoRows) {
+			return models.Site{}, ErrBlogDoesNotExist
+		}
+
+		return models.Site{}, fmt.Errorf("error fetching site from database: %w", err)
+	}
+
+	return site, nil
 }

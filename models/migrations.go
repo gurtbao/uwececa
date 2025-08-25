@@ -9,7 +9,7 @@ var Migrations = []db.Migration{
 		_, err := tx.Exec(`
 			CREATE TABLE IF NOT EXISTS users (
     			id INTEGER PRIMARY KEY AUTOINCREMENT,
-    			email VARCHAR(255) NOT NULL UNIQUE,
+    			net_id VARCHAR(255) NOT NULL UNIQUE,
     			password VARCHAR(255) NOT NULL,
 				name VARCHAR(255) NOT NULL,
     			verified_at timestamp,

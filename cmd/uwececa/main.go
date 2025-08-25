@@ -13,6 +13,7 @@ import (
 
 	"uwece.ca/app/config"
 	"uwece.ca/app/db"
+	"uwece.ca/app/mailer"
 	"uwece.ca/app/models"
 	"uwece.ca/app/site"
 	"uwece.ca/app/utils/shutdown"
@@ -55,7 +56,9 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("error running db migrations: %w", err)
 	}
 
-	mainsite := site.New(cfg, db)
+	mailer := mailer.New(cfg)
+
+	mainsite := site.New(cfg, db, mailer)
 
 	startServer(mainsite.Routes(), cfg.Core.Addr)
 

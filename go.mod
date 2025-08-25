@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	github.com/go-chi/chi/v5 v5.2.2
+	github.com/gorilla/schema v1.4.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/matthewhartstonge/argon2 v1.3.4
 	github.com/mattn/go-sqlite3 v1.14.22
