@@ -32,7 +32,7 @@ type BlogNewRequest struct {
 
 func (b BlogNewRequest) Validate() error {
 	filteredName := strings.Map(func(r rune) rune {
-		if r < 'a' || r > 'z' {
+		if (r < 'a' || r > 'z') && r != '-' {
 			return -1
 		}
 
