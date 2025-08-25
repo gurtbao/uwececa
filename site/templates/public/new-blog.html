@@ -9,21 +9,20 @@
 		<form hx-post="/new-blog" hx-target="#error-target" , hx-swap="innerHTML">
 			<div class="mb-3">
 				<label for="name" class="form-label">Name:</label>
-				<input type="text" class="form-control" id="name" name="name" required aria-describedby="name"
-					value="{{ .Data.Name }}">
+				<input type="text" class="form-control" id="name" name="Name" required aria-described-by="name"
+					value="{{ .name }}">
 				<div id="nameHelp" class="form-text">Your preferred name for {name}.{year}.uwece.ca.</div>
 			</div>
 
 			<div class="mb-3">
 				<label for="year" class="form-label">Grad Year:</label>
-				<select id="year" class="form-select" name="year" aria-label="grad year">
+				<select id="year" class="form-select" name="Year" aria-label="grad year">
 					<option selected value="30">2030</option>
 					<option value="29">2029</option>
 					<option value="28">2028</option>
 					<option value="27">2027</option>
 					<option value="26">2026</option>
 				</select>
-				<div id="nameHelp" class="form-text">Your grad year (rendered as '30).</div>
 			</div>
 
 			<button class="btn btn-dark w-100 mt-4" onclick="submit">Create</button>

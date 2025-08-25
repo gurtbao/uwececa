@@ -18,7 +18,7 @@ func TestUserInsert(t *testing.T) {
 	require.NoError(t, d.RunMigrations(models.Migrations))
 
 	ne := models.NewUser{
-		Email:    "me@me.com",
+		NetID:    "halo",
 		Password: "1234",
 		Name:     "Lorenzo",
 	}
@@ -26,7 +26,7 @@ func TestUserInsert(t *testing.T) {
 	usr, err := models.InsertUser(context.Background(), d, ne)
 	require.NoError(t, err)
 
-	require.Equal(t, ne.Email, usr.Email)
+	require.Equal(t, ne.NetID, usr.NetID)
 	require.Equal(t, ne.Password, usr.Password)
 	require.Equal(t, ne.Name, usr.Name)
 }
@@ -38,7 +38,7 @@ func TestUserInsertGivesConflictError(t *testing.T) {
 	require.NoError(t, d.RunMigrations(models.Migrations))
 
 	ne := models.NewUser{
-		Email:    "me@me.com",
+		NetID:    "halo",
 		Password: "1234",
 	}
 
@@ -73,14 +73,14 @@ func TestUserGet(t *testing.T) {
 	require.NoError(t, d.RunMigrations(models.Migrations))
 
 	ne := models.NewUser{
-		Email:    "me@me.com",
+		NetID:    "hallo",
 		Password: "1234",
 	}
 
 	usr, err := models.InsertUser(context.Background(), d, ne)
 	require.NoError(t, err)
 
-	result, err := models.GetUser(context.Background(), d, db.FilterEq("email", "me@me.com"))
+	result, err := models.GetUser(context.Background(), d, db.FilterEq("net_id", "hallo"))
 	require.NoError(t, err)
 
 	require.Equal(t, usr, result)

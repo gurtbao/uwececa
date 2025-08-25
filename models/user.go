@@ -11,7 +11,7 @@ import (
 
 type User struct {
 	Id    int    `db:"id"`
-	Email string `db:"email"`
+	NetID string `db:"net_id"`
 	Name  string `db:"name"`
 
 	Password string `db:"password"`
@@ -22,16 +22,16 @@ type User struct {
 }
 
 type NewUser struct {
-	Email    string
+	NetID    string
 	Name     string
 	Password string
 }
 
 func InsertUser(ctx context.Context, d db.Ex, user NewUser) (User, error) {
-	query := `insert into users (email, name, password) values (?, ?, ?) returning *`
+	query := `insert into users (net_id, name, password) values (?, ?, ?) returning *`
 
 	var usr User
-	err := db.GetContext(ctx, d, &usr, query, user.Email, user.Name, user.Password)
+	err := db.GetContext(ctx, d, &usr, query, user.NetID, user.Name, user.Password)
 	if err != nil {
 		return User{}, db.HandleError(err)
 	}

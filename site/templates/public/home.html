@@ -11,7 +11,7 @@
 			<b>name.year.uwece.ca.</b>
 		</p>
 		<div class="flex">
-			{{ if not .LoggedInUser }}
+			{{ if not .current_user }}
 			<a class="btn btn-warning" href="/signup">Sign Up Now</a>
 			{{ else }}
 			<a class="btn btn-warning" href="/site">Your Site</a>

@@ -25,11 +25,11 @@
 			<a class="navbar-brand fw-bold">UWaterloo ECE</a>
 
 			<div>
-				{{ if not .LoggedInUser }}
+				{{ if not .current_user }}
 				<a class="btn btn-outline-dark" href="/login">Login</a>
 				{{ else }}
 				<div class="dropdown">
-					<button class="btn dropdown-toggle" data-bs-toggle="dropdown">{{ .LoggedInUser.Name }}</button>
+					<button class="btn dropdown-toggle" data-bs-toggle="dropdown">{{ .current_user.Name }}</button>
 
 					<ul class="dropdown-menu">
 						<li><a class="dropdown-item" href="/site">Your Blog</a></li>
